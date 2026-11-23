@@ -189,22 +189,39 @@ jobs:
 
       # The three tabs are also three URLs, so the capture is a list of addresses
       # rather than a sequence of taps that a layout change would break.
+      # Each tab is a separate launch, not a tap and not a URL. The URL route was
+      # tried first: it delivered nothing, the job stayed green, and all three
+      # pictures showed the same screen. A launch argument is read before the first
+      # render, so it cannot be silently ignored.
       - name: Install and capture each tab
         env:
           UDID: ${{ steps.sim.outputs.udid }}
         run: |
           set -euo pipefail
           xcrun simctl install "${UDID}" build-sim/HealthCollector.app
-          xcrun simctl launch "${UDID}" com.braintimebox.healthcollector -uiScreenshots
-          sleep 5
           mkdir -p screens
           for tab in export browse settings; do
-            xcrun simctl openurl "${UDID}" "healthcollector://${tab}"
-            sleep 3
+            xcrun simctl terminate "${UDID}" com.braintimebox.healthcollector 2>/dev/null || true
+            xcrun simctl launch "${UDID}" com.braintimebox.healthcollector -uiScreenshots -initialTab "${tab}"
+            sleep 4
             xcrun simctl io "${UDID}" screenshot "screens/${tab}.png"
           done
           ls -l screens
           file screens/*.png
+
+      # A capture job that uploads three copies of one screen is worse than no
+      # capture job: it looks like evidence. Distinct hashes are the cheapest
+      # assertion that the tab actually changed.
+      - name: Assert the screenshots differ
+        run: |
+          set -euo pipefail
+          distinct=$(sha256sum screens/*.png | awk '{print $1}' | sort -u | wc -l | tr -d ' ')
+          echo "distinct screenshots: ${distinct}"
+          if [[ "${distinct}" -ne 3 ]]; then
+            echo "screenshots are not distinct — the tab did not change:" >&2
+            sha256sum screens/*.png >&2
+            exit 1
+          fi
 
       - name: Upload screenshots
         uses: actions/upload-artifact@v7
