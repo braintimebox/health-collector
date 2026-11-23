@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/master.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.derived/runner.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/runner.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/runner.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/runner.swiftdeps"
+  }
+}

@@ -1,0 +1,115 @@
+# Unsigned IPA for the collector skeleton, plus the text contract that guards it.
+#
+# The owner signs the artifact outside CI with the FlareStore certificate, so this
+# workflow deliberately produces an unsigned bundle and never touches signing
+# material: no certificate, no profile, no secrets.
+#
+# Two jobs on purpose. The contract job runs on Linux in seconds and catches the
+# failures that a macOS run would only surface as a red build with no explanation:
+# an entitlement dropped from the file, a Swift file that never reaches the
+# compiler, a build setting pointing at nothing. The IPA job runs only if the
+# contract holds.
+
+name: Health Collector IPA
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: health-collector-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: bundle contract (text)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Entitlements, Info.plist and project references
+        run: python3 scripts/check-bundle-contract.py
+
+      - name: Prove the checker still fails when the contract breaks
+        run: bash scripts/test-bundle-contract.sh
+
+  ipa:
+    name: unsigned ipa
+    needs: contract
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Show toolchain
+        run: xcodebuild -version
+
+      # No signing identity is requested: the bundle is signed later, by the owner,
+      # with a profile whose entitlements must match HealthCollector.entitlements.
+      - name: Build for device (unsigned)
+        run: |
+          set -euo pipefail
+          xcodebuild build \
+            -project HealthCollector.xcodeproj \
+            -target HealthCollector \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath "${{ runner.temp }}/DerivedData" \
+            CONFIGURATION_BUILD_DIR="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+          2>&1 | tee xcodebuild.log
+
+      - name: Assert the bundle is complete
+        run: |
+          set -euo pipefail
+          app="build/HealthCollector.app"
+          test -d "${app}" || { echo "no app bundle at ${app}" >&2; ls -la build >&2; exit 1; }
+          test -f "${app}/HealthCollector" || { echo "no executable" >&2; exit 1; }
+          test -f "${app}/Info.plist" || { echo "no Info.plist" >&2; exit 1; }
+          # An unsigned bundle must NOT carry a signature: if this ever starts
+          # passing, the workflow has begun signing without anyone deciding to.
+          if [[ -e "${app}/_CodeSignature" ]]; then
+            echo "unexpected _CodeSignature in an unsigned build" >&2
+            exit 1
+          fi
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "${app}/Info.plist"
+
+      - name: Package IPA
+        run: |
+          set -euo pipefail
+          version="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" build/HealthCollector.app/Info.plist)"
+          mkdir -p Payload
+          cp -R build/HealthCollector.app Payload/
+          zip -q -r "HealthCollector-${version}.ipa" Payload
+          rm -rf Payload
+          ls -lh *.ipa
+          shasum -a 256 *.ipa | tee HealthCollector.ipa.sha256
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v7
+        with:
+          name: health-collector-ipa
+          path: |
+            HealthCollector-*.ipa
+            HealthCollector.ipa.sha256
+          if-no-files-found: error
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: xcodebuild-log
+          path: xcodebuild.log
+          if-no-files-found: ignore

@@ -1,0 +1,904 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.xctest",
+      "packagePath" : "/home/openclaw/workspace/health-collector",
+      "productName" : "HealthCollectorCorePackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+    "HealthCollectorCorePackageDiscoveredTests"
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.HealthCollectorCore-x86_64-unknown-linux-gnu-debug.module" : {
+      "executable" : "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "fileList" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/sources",
+      "importPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BackgroundWake.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BatchSpool.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Collector.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Outbox.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Status.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/SyncEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Transport.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Wire.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/swift-version--4698390997AE666E.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "HealthCollectorCore",
+      "moduleOutputPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCore.swiftmodule",
+      "objects" : [
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BackgroundWake.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BatchSpool.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Collector.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Outbox.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Status.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/SyncEngine.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Transport.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Wire.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "x86_64-unknown-linux-gnu",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j4",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "5",
+        "-g",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "health_collector",
+        "-Xcc",
+        "-fno-omit-frame-pointer"
+      ],
+      "outputFileMapPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BackgroundWake.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BatchSpool.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Collector.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Outbox.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Status.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/SyncEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Transport.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Wire.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCore.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BackgroundWake.swift",
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BatchSpool.swift",
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Collector.swift",
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Outbox.swift",
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Status.swift",
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/SyncEngine.swift",
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Transport.swift",
+        "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Wire.swift"
+      ],
+      "tempsPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.HealthCollectorCorePackageDiscoveredTests-x86_64-unknown-linux-gnu-debug.module" : {
+      "executable" : "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "fileList" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/sources",
+      "importPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/HealthCollectorCoreTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/all-discovered-tests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/swift-version--4698390997AE666E.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCoreTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "HealthCollectorCorePackageDiscoveredTests",
+      "moduleOutputPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCorePackageDiscoveredTests.swiftmodule",
+      "objects" : [
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/HealthCollectorCoreTests.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/all-discovered-tests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "x86_64-unknown-linux-gnu",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j4",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-g",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "health_collector",
+        "-Xcc",
+        "-fno-omit-frame-pointer"
+      ],
+      "outputFileMapPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/HealthCollectorCoreTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/all-discovered-tests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCorePackageDiscoveredTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/HealthCollectorCoreTests.swift",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/all-discovered-tests.swift"
+      ],
+      "tempsPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.HealthCollectorCorePackageTests-x86_64-unknown-linux-gnu-debug.module" : {
+      "executable" : "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "fileList" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/sources",
+      "importPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/swift-version--4698390997AE666E.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCoreTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCorePackageDiscoveredTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "HealthCollectorCorePackageTests",
+      "moduleOutputPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCorePackageTests.swiftmodule",
+      "objects" : [
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "x86_64-unknown-linux-gnu",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j4",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-g",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "health_collector",
+        "-Xcc",
+        "-fno-omit-frame-pointer"
+      ],
+      "outputFileMapPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCorePackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.HealthCollectorCoreTests-x86_64-unknown-linux-gnu-debug.module" : {
+      "executable" : "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "fileList" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/sources",
+      "importPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/DurabilityTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/ReimportTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/Support.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/SyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/TransferTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/WireTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/swift-version--4698390997AE666E.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCore.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "HealthCollectorCoreTests",
+      "moduleOutputPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCoreTests.swiftmodule",
+      "objects" : [
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/DurabilityTests.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/ReimportTests.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/Support.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/SyncTests.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/TransferTests.swift.o",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/WireTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "x86_64-unknown-linux-gnu",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j4",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "5",
+        "-g",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "health_collector",
+        "-Xcc",
+        "-fno-omit-frame-pointer"
+      ],
+      "outputFileMapPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/DurabilityTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/ReimportTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/Support.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/SyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/TransferTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/WireTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCoreTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/DurabilityTests.swift",
+        "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/ReimportTests.swift",
+        "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/Support.swift",
+        "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/SyncTests.swift",
+        "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/TransferTests.swift",
+        "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/WireTests.swift"
+      ],
+      "tempsPath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "HealthCollectorCore" : [
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "-module-name",
+      "HealthCollectorCore",
+      "-package-name",
+      "health_collector",
+      "-incremental",
+      "-c",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BackgroundWake.swift",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BatchSpool.swift",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Collector.swift",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Outbox.swift",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Status.swift",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/SyncEngine.swift",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Transport.swift",
+      "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Wire.swift",
+      "-I",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "-target",
+      "x86_64-unknown-linux-gnu",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j4",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "5",
+      "-g",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "health_collector",
+      "-Xcc",
+      "-fno-omit-frame-pointer",
+      "-driver-use-frontend-path",
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc"
+    ],
+    "HealthCollectorCorePackageDiscoveredTests" : [
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "-module-name",
+      "HealthCollectorCorePackageDiscoveredTests",
+      "-package-name",
+      "health_collector",
+      "-incremental",
+      "-c",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/HealthCollectorCoreTests.swift",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/all-discovered-tests.swift",
+      "-I",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "-target",
+      "x86_64-unknown-linux-gnu",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j4",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-g",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "health_collector",
+      "-Xcc",
+      "-fno-omit-frame-pointer",
+      "-driver-use-frontend-path",
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc"
+    ],
+    "HealthCollectorCorePackageTests" : [
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "-module-name",
+      "HealthCollectorCorePackageTests",
+      "-package-name",
+      "health_collector",
+      "-incremental",
+      "-c",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.derived/runner.swift",
+      "-I",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "-target",
+      "x86_64-unknown-linux-gnu",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j4",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-g",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "health_collector",
+      "-Xcc",
+      "-fno-omit-frame-pointer",
+      "-driver-use-frontend-path",
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc"
+    ],
+    "HealthCollectorCoreTests" : [
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc",
+      "-module-name",
+      "HealthCollectorCoreTests",
+      "-package-name",
+      "health_collector",
+      "-incremental",
+      "-c",
+      "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/DurabilityTests.swift",
+      "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/ReimportTests.swift",
+      "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/Support.swift",
+      "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/SyncTests.swift",
+      "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/TransferTests.swift",
+      "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/WireTests.swift",
+      "-I",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules",
+      "-target",
+      "x86_64-unknown-linux-gnu",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j4",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "5",
+      "-g",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "health_collector",
+      "-Xcc",
+      "-fno-omit-frame-pointer",
+      "-driver-use-frontend-path",
+      "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "HealthCollectorCore" : [
+
+    ],
+    "HealthCollectorCorePackageDiscoveredTests" : [
+      "HealthCollectorCoreTests",
+      "HealthCollectorCore"
+    ],
+    "HealthCollectorCorePackageTests" : [
+      "HealthCollectorCorePackageDiscoveredTests",
+      "HealthCollectorCoreTests",
+      "HealthCollectorCore"
+    ],
+    "HealthCollectorCoreTests" : [
+      "HealthCollectorCore"
+    ]
+  },
+  "testDiscoveryCommands" : {
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/all-discovered-tests.swift" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/DurabilityTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/ReimportTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/Support.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/SyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/TransferTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/WireTests.swift.o"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/HealthCollectorCoreTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/all-discovered-tests.swift"
+        }
+      ]
+    }
+  },
+  "testEntryPointCommands" : {
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.derived/runner.swift" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/Modules/HealthCollectorCorePackageDiscoveredTests.swiftmodule"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "writeCommands" : {
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BackgroundWake.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BatchSpool.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Collector.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Outbox.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Status.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/SyncEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Transport.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Wire.swift"
+        }
+      ],
+      "outputFilePath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/sources"
+    },
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/HealthCollectorCoreTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.derived/all-discovered-tests.swift"
+        }
+      ],
+      "outputFilePath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/sources"
+    },
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/sources"
+    },
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BackgroundWake.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BatchSpool.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Collector.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/HealthCollectorCore.swiftmodule.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Outbox.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Status.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/SyncEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Transport.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Wire.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/HealthCollectorCorePackageDiscoveredTests.swiftmodule.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/HealthCollectorCoreTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageDiscoveredTests.build/all-discovered-tests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/HealthCollectorCorePackageTests.swiftmodule.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/DurabilityTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/HealthCollectorCoreTests.swiftmodule.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/ReimportTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/Support.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/SyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/TransferTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/WireTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCorePackageTests.product/Objects.LinkFileList"
+    },
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/DurabilityTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/ReimportTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/Support.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/SyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/TransferTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/workspace/health-collector/Tests/HealthCollectorCoreTests/WireTests.swift"
+        }
+      ],
+      "outputFilePath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCoreTests.build/sources"
+    },
+    "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/swift-version--4698390997AE666E.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/home/openclaw/.local/swift-dl/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/swift-version--4698390997AE666E.txt"
+    }
+  }
+}

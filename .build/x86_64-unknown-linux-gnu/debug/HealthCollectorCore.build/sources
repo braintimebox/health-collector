@@ -1,0 +1,8 @@
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BackgroundWake.swift
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BatchSpool.swift
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Collector.swift
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Outbox.swift
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Status.swift
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/SyncEngine.swift
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Transport.swift
+/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Wire.swift

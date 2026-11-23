@@ -1,0 +1,53 @@
+{
+  "": {
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/master.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BackgroundWake.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BackgroundWake.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BackgroundWake.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BackgroundWake~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BackgroundWake.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/BatchSpool.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BatchSpool.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BatchSpool.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BatchSpool~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/BatchSpool.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Collector.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Collector.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Collector.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Collector~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Collector.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Outbox.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Outbox.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Outbox.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Outbox~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Outbox.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Status.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Status.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Status.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Status~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Status.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/SyncEngine.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/SyncEngine.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/SyncEngine.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/SyncEngine~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/SyncEngine.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Transport.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Transport.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Transport.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Transport~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Transport.swiftdeps"
+  },
+  "/home/openclaw/workspace/health-collector/Sources/HealthCollectorCore/Wire.swift": {
+    "dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Wire.d",
+    "object": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Wire.swift.o",
+    "swiftmodule": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Wire~partial.swiftmodule",
+    "swift-dependencies": "/home/openclaw/workspace/health-collector/.build/x86_64-unknown-linux-gnu/debug/HealthCollectorCore.build/Wire.swiftdeps"
+  }
+}
