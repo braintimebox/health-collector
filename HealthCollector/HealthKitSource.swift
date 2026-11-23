@@ -136,7 +136,7 @@ final class HealthKitSource: HealthSource {
             for object in deletedObjects ?? [] {
                 deleted.append(DeletedRecord(
                     identity: RecordIdentity(userID: self.userID, recordID: object.uuid.uuidString),
-                    deletedAt: WireTimestamp.string(from: Date(), timeZone: .current),
+                    deletedAt: ISOTimestamp.utcString(from: Date()),
                     sourceName: "Apple Health"
                 ))
             }
@@ -160,8 +160,8 @@ final class HealthKitSource: HealthSource {
 
     private static func record(from sample: HKSample, mapping: TypeMapping, userID: String) -> HealthRecord? {
         let source = sample.sourceRevision.source
-        let start = WireTimestamp.string(from: sample.startDate, timeZone: .current)
-        let end = WireTimestamp.string(from: sample.endDate, timeZone: .current)
+        let start = ISOTimestamp.string(from: sample.startDate, timeZone: .current)
+        let end = ISOTimestamp.string(from: sample.endDate, timeZone: .current)
         let zone = TimeZone.current.identifier
 
         func make(_ value: Double, _ unit: String) -> HealthRecord {

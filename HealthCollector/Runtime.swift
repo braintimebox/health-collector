@@ -123,7 +123,7 @@ struct URLSessionTransport: OutboxTransport {
 
     func send(_ batch: WireBatch) throws -> ServerAck {
         guard !token.isEmpty else {
-            throw TransportFailure(kind: .permanent, message: "no token configured")
+            throw TransportFailure(kind: .http, status: 401, message: "no token configured")
         }
         let request = try MeasurementClient.makeRequest(batch: batch, baseURL: baseURL, token: token)
         let semaphore = DispatchSemaphore(value: 0)
@@ -139,7 +139,10 @@ struct URLSessionTransport: OutboxTransport {
                 return
             }
             do {
-                outcome = .success(try MeasurementClient.parseReply(status: http.statusCode, body: data))
+                outcome = .success(try MeasurementClient.decode(
+                    reply: HTTPReply(status: http.statusCode,
+                                     retryAfter: http.value(forHTTPHeaderField: "Retry-After").flatMap(Double.init),
+                                     body: data)))
             } catch let failure as TransportFailure {
                 outcome = .failure(failure)
             } catch {
