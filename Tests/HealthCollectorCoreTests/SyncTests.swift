@@ -141,7 +141,9 @@ final class SyncTests: XCTestCase {
         XCTAssertEqual(policy.classification(for: TransportFailure(kind: .http, status: 503, message: "")), .retryable)
         XCTAssertEqual(policy.classification(for: TransportFailure(kind: .http, status: 408, message: "")), .retryable)
         XCTAssertEqual(policy.classification(for: TransportFailure(kind: .http, status: 429, message: "")), .retryable)
-        XCTAssertEqual(policy.classification(for: TransportFailure(kind: .http, status: 401, message: "")), .permanent)
+        // 401/403 retry: a wrong token must not become lost measurements.
+        XCTAssertEqual(policy.classification(for: TransportFailure(kind: .http, status: 401, message: "")), .retryable)
+        XCTAssertEqual(policy.classification(for: TransportFailure(kind: .http, status: 403, message: "")), .retryable)
         XCTAssertEqual(policy.classification(for: TransportFailure(kind: .http, status: 404, message: "")), .permanent)
         XCTAssertEqual(policy.classification(for: TransportFailure(kind: .malformedAck, message: "")), .unconfirmed)
     }
