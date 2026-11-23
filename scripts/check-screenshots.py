@@ -95,16 +95,39 @@ def read_png(path: Path) -> tuple[int, int, list[list[tuple[int, int, int]]]]:
     return width, height, rows
 
 
+# The glyph row of the tab bar only. Measured on real captures (1206x2622): accent
+# pixels live 221..98 px above the bottom edge, i.e. 8.4%..3.7% of the height. The
+# previous band was the bottom 187 px, which also covered the home-indicator area and
+# reached above the bar — so an accent-coloured block in the content (and in dark mode
+# the content really does show through) could be counted as the selected tab.
+BAND_TOP = 0.096
+BAND_BOTTOM = 0.034
+
+
+def band_rows(height: int) -> tuple[int, int]:
+    return int(height * (1 - BAND_TOP)), int(height * (1 - BAND_BOTTOM))
+
+
 def accent_thirds(rows: list[list[tuple[int, int, int]]], width: int, height: int) -> list[int]:
-    """Count accent pixels per horizontal third of the bottom bar."""
-    band_top = height - max(120, height // 14)
+    """Count accent pixels per horizontal third of the tab bar's glyph row."""
+    top, bottom = band_rows(height)
     thirds = [0, 0, 0]
-    for y in range(band_top, height):
-        row = rows[y]
-        for x, (r, g, b) in enumerate(row):
+    for y in range(top, bottom):
+        for x, (r, g, b) in enumerate(rows[y]):
             if is_accent(r, g, b):
                 thirds[min(2, x * 3 // width)] += 1
     return thirds
+
+
+def accent_anywhere(rows: list[list[tuple[int, int, int]]], width: int, height: int) -> int:
+    """Accent pixels in the whole frame — used to tell "wrong screen" from "wrong band"."""
+    top, _ = band_rows(height)
+    total = 0
+    for y in range(0, top):
+        for (r, g, b) in rows[y]:
+            if is_accent(r, g, b):
+                total += 1
+    return total
 
 
 # The tab bar stays visible under a pushed screen, so a nested capture is checked
@@ -145,6 +168,21 @@ def main(argv: list[str]) -> int:
         thirds = accent_thirds(rows, width, height)
         seen[path.stem] = thirds
         total = sum(thirds)
+        if total == 0:
+            # Three states, not two: a band with nothing in it means the checker is
+            # looking in the wrong place (or the capture is not this app at all), and
+            # reporting that as a pass is how a guard starts lying.
+            outside = accent_anywhere(rows, width, height)
+            if outside:
+                print(
+                    f"UNKNOWN: {path.name}: в полосе глифов акцента нет, а вне её {outside} px — "
+                    "полоса не совпадает с вёрсткой панели",
+                    file=sys.stderr,
+                )
+                return 2
+            print(f"FAIL: {path.name}: панели вкладок не найдено — снят другой экран?", file=sys.stderr)
+            failures += 1
+            continue
         winner = thirds.index(max(thirds))
         share = (max(thirds) / total) if total else 0.0
         ok = winner == expected and share >= 0.5
