@@ -28,6 +28,17 @@
 	     purpose. If a write path ever appears, this string appears with it. -->
 	<key>NSHealthShareUsageDescription</key>
 	<string>Health Collector reads heart rate variability, pulse, resting heart rate, sleep, steps, active energy, workouts and respiratory rate so it can sync them to your own server. Data leaves the phone only to the server you configure.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>healthcollector</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

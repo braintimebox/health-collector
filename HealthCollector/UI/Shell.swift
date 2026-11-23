@@ -4,9 +4,25 @@ import SwiftUI
 /// scroll position and the pushed detail screen.
 struct AppShell: View {
     @ObservedObject var runtime: CollectorRuntime
-    @State private var selection: Tab = .export
+    @State private var selection: Tab = AppShell.initialTab
 
     enum Tab: Hashable { case export, browse, settings }
+
+    /// A screenshot job needs each screen without driving the UI, and a URL is not a
+    /// reliable way to get there: the first attempt delivered nothing and produced
+    /// three pictures of the same tab while the job stayed green. A launch argument
+    /// cannot be dropped, because the value is read before the first render.
+    static var initialTab: Tab {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-initialTab"), index + 1 < arguments.count else {
+            return .export
+        }
+        switch arguments[index + 1] {
+        case "browse": return .browse
+        case "settings": return .settings
+        default: return .export
+        }
+    }
 
     var body: some View {
         TabView(selection: $selection) {
@@ -23,6 +39,16 @@ struct AppShell: View {
                 .tag(Tab.settings)
         }
         .task { runtime.start() }
+        // Three tabs are also three addresses: `healthcollector://browse` is what a
+        // screenshot job, and later a Shortcut, uses to land on a screen without
+        // driving the UI.
+        .onOpenURL { url in
+            switch url.host {
+            case "browse": selection = .browse
+            case "settings": selection = .settings
+            default: selection = .export
+            }
+        }
     }
 }
 
