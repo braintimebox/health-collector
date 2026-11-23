@@ -12,7 +12,7 @@ struct SettingsTab: View {
                 NavigationLink("Advanced") { AdvancedView(runtime: runtime) }
                 NavigationLink("Notifications") { NotificationsView() }
                 NavigationLink("About") { AboutView() }
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("Every value on these screens comes from the collector's stored state or from HealthKit. Nothing is a demo value.")
             }
         }
@@ -29,7 +29,7 @@ struct PermissionsView: View {
         List {
             Section {
                 StatusRow(title: "Request", value: runtime.snapshot.permissions)
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("iOS does not tell an app whether read access was granted. A refused type looks exactly like a type with no data, and limited access is the only state an app can positively identify. This screen therefore reports what was requested, not a false \"Connected\".")
             }
             Section {
@@ -59,7 +59,7 @@ struct ExportSettingsView: View {
             Section {
                 Toggle("Automatic collection", isOn: $automated)
                     .onChange(of: automated) { _, value in AppSettings.automationEnabled = value }
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("When off, the collector only runs when you open the app or press Sync. Background wakes are requested from iOS either way; it decides when they happen.")
             }
             Section("Server") {
@@ -88,7 +88,7 @@ struct UnitPreferencesView: View {
             Section {
                 Label("Not implemented", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("Stored values keep the unit the server validated (ms, count/min, kcal, h, min). Display conversion would live here and would never rewrite stored rows — changing stored units retroactively would break the series.")
             }
             Section("Planned") {
@@ -140,7 +140,7 @@ struct AdvancedView: View {
                     UIPasteboard.general.string = runtime.diagnosticsText()
                     copied = true
                 }
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("The export contains counts, timestamps and the endpoint host. It never contains the token or any measurement values.")
             }
         }
@@ -156,7 +156,7 @@ struct NotificationsView: View {
             Section {
                 Label("Not implemented", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("Local notifications for sync failures need an authorisation request and a notification scheduler; neither is written. Nothing here pretends to be enabled.")
             }
             Section("Planned") {

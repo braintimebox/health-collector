@@ -54,7 +54,7 @@ struct BrowseTab: View {
                     reason: "Nutrition is not collected by this app.") }
             } header: {
                 Text("Categories")
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("Categories listed as not implemented are marked honestly: the app never asked for those types, so there is nothing to show.")
             }
         }

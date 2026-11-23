@@ -132,7 +132,7 @@ struct ManualExportView: View {
                     HStack { Spacer(); Text("Collect and send").bold(); Spacer() }
                 }
                 .disabled(sending)
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("Manual runs go through the same Outbox and the same acknowledgement rules. Nothing here bypasses the queue.")
             }
         }
@@ -151,7 +151,7 @@ struct AutomatedView: View {
             Section {
                 Toggle("Automatic collection", isOn: $enabled)
                     .onChange(of: enabled) { _, value in AppSettings.automationEnabled = value }
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("iOS decides when a background wake-up happens. The collector registers an observer and enables background delivery; it does not promise a schedule.")
             }
             Section("Last run") {
@@ -216,7 +216,7 @@ struct ServerView: View {
                 StatusRow(title: "Last error", value: runtime.snapshot.lastError ?? "none",
                           tone: runtime.snapshot.lastError == nil ? .good : .bad)
                 Button("Send now") { runtime.syncNow(reason: "manual from server screen") }
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("Uses the existing measurement contract: idempotent by (user, record id), deletes as tombstones, per-record acknowledgement.")
             }
         }
@@ -232,7 +232,7 @@ struct SyncToMacView: View {
             Section {
                 Label("Not implemented", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("Mac sync needs a receiver on the Mac. Today there is no such receiver, and the app will not show a connected state for something that does not exist. The planned path is the same measurement API over the local network.")
             }
             Section("What it would take") {
@@ -252,7 +252,7 @@ struct ShortcutsView: View {
             Section {
                 Label("Not implemented", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
-            } header: { EmptyView() } footer: {
+            } header: {
                 Text("App Intents are not written yet. The three planned actions map to existing core calls, so the work is the intent layer, not the logic.")
             }
             Section("Planned actions") {
