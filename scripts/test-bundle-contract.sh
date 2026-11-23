@@ -17,7 +17,10 @@ trap 'rm -rf "${WORK}"' EXIT
 
 mkdir -p "${WORK}/scripts" "${WORK}/HealthCollector" "${WORK}/HealthCollector.xcodeproj"
 cp "${ROOT}/scripts/check-bundle-contract.py" "${WORK}/scripts/"
-cp "${ROOT}/HealthCollector/"*.plist "${ROOT}/HealthCollector/"*.entitlements "${ROOT}/HealthCollector/"*.swift "${WORK}/HealthCollector/"
+# Копируется всё дерево, а не только файлы в корне: иначе новая подпапка (UI/)
+# исчезает из копии, checker видит ссылки на несуществующие файлы и «базовое
+# дерево» падает раньше мутаций.
+cp -R "${ROOT}/HealthCollector/." "${WORK}/HealthCollector/"
 cp "${ROOT}/HealthCollector.xcodeproj/project.pbxproj" "${WORK}/HealthCollector.xcodeproj/"
 
 check() { python3 "${WORK}/scripts/check-bundle-contract.py" >/dev/null 2>&1; echo $?; }
