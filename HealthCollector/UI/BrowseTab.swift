@@ -24,8 +24,7 @@ struct BrowseTab: View {
                         .padding(.vertical, 4)
                     }
                 }
-            } header: {
-                Text("Recent")
+                Text("Recent").font(.caption).foregroundStyle(.secondary)
             }
 
             Section("Metrics") {
@@ -52,10 +51,8 @@ struct BrowseTab: View {
                     reason: "Body metrics are not collected by this app.") }
                 NavigationLink("Nutrition") { NotImplementedView(feature: "Nutrition",
                     reason: "Nutrition is not collected by this app.") }
-            } header: {
-                Text("Categories")
-            } header: {
                 Text("Categories listed as not implemented are marked honestly: the app never asked for those types, so there is nothing to show.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Browse")

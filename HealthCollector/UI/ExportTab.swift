@@ -132,8 +132,7 @@ struct ManualExportView: View {
                     HStack { Spacer(); Text("Collect and send").bold(); Spacer() }
                 }
                 .disabled(sending)
-            } header: {
-                Text("Manual runs go through the same Outbox and the same acknowledgement rules. Nothing here bypasses the queue.")
+                Text("Manual runs go through the same Outbox and the same acknowledgement rules. Nothing here bypasses the queue.").font(.caption).foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Manual")
@@ -151,8 +150,7 @@ struct AutomatedView: View {
             Section {
                 Toggle("Automatic collection", isOn: $enabled)
                     .onChange(of: enabled) { _, value in AppSettings.automationEnabled = value }
-            } header: {
-                Text("iOS decides when a background wake-up happens. The collector registers an observer and enables background delivery; it does not promise a schedule.")
+                Text("iOS decides when a background wake-up happens. The collector registers an observer and enables background delivery; it does not promise a schedule.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Last run") {
                 StatusRow(title: "Run", value: relative(runtime.snapshot.lastRunAt))
@@ -216,8 +214,7 @@ struct ServerView: View {
                 StatusRow(title: "Last error", value: runtime.snapshot.lastError ?? "none",
                           tone: runtime.snapshot.lastError == nil ? .good : .bad)
                 Button("Send now") { runtime.syncNow(reason: "manual from server screen") }
-            } header: {
-                Text("Uses the existing measurement contract: idempotent by (user, record id), deletes as tombstones, per-record acknowledgement.")
+                Text("Uses the existing measurement contract: idempotent by (user, record id), deletes as tombstones, per-record acknowledgement.").font(.caption).foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Server")
@@ -232,8 +229,7 @@ struct SyncToMacView: View {
             Section {
                 Label("Not implemented", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
-            } header: {
-                Text("Mac sync needs a receiver on the Mac. Today there is no such receiver, and the app will not show a connected state for something that does not exist. The planned path is the same measurement API over the local network.")
+                Text("Mac sync needs a receiver on the Mac. Today there is no such receiver, and the app will not show a connected state for something that does not exist. The planned path is the same measurement API over the local network.").font(.caption).foregroundStyle(.secondary)
             }
             Section("What it would take") {
                 Text("1. A receiver on the Mac exposing the measurement endpoint.")
@@ -252,8 +248,7 @@ struct ShortcutsView: View {
             Section {
                 Label("Not implemented", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
-            } header: {
-                Text("App Intents are not written yet. The three planned actions map to existing core calls, so the work is the intent layer, not the logic.")
+                Text("App Intents are not written yet. The three planned actions map to existing core calls, so the work is the intent layer, not the logic.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Planned actions") {
                 Text("Sync Now — drains the outbox once.")
