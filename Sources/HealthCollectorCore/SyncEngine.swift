@@ -155,12 +155,29 @@ public struct SyncEngine {
             uniquingKeysWith: { first, _ in first }
         )
 
+        // BUG-03: identity → rows in this batch. With more than one operation per
+        // identity the server's `accepted: [record_id]` cannot say which one it
+        // stored, so nothing in that group may be treated as confirmed.
+        var rowsPerIdentity: [String: Int] = [:]
+        for entry in claimed {
+            rowsPerIdentity[entry.payload.identity.canonicalKey, default: 0] += 1
+        }
+
         var decisions: [String: Settlement] = [:]
         var acceptedCount = 0
         var retriedCount = 0
         var deadCount = 0
-        let unconfirmedCount = 0
+        var unconfirmedCount = 0
         for entry in claimed {
+            let identity = entry.payload.identity.canonicalKey
+            if (rowsPerIdentity[identity] ?? 0) > 1 {
+                decisions[entry.key] = .unconfirmed(
+                    delay: policy.delay(forAttempt: entry.attempt + 1, jitter: jitter),
+                    error: "ambiguous ack: two operations for one identity in one batch"
+                )
+                unconfirmedCount += 1
+                continue
+            }
             let recordID = entry.payload.identity.recordID.lowercased()
             if accepted.contains(recordID)
                 || accepted.contains(entry.key)
@@ -188,6 +205,9 @@ public struct SyncEngine {
         }
 
         try store.settle(decisions, now: now)
+        // Confirmed rows are history, not queue: keep a recent tail for the
+        // diagnostics panel and drop the rest.
+        try store.pruneAcked(keeping: 200)
         return SyncReport(
             claimed: claimed.count,
             accepted: acceptedCount,
@@ -210,7 +230,8 @@ public struct SyncEngine {
         for entry in claimed {
             switch classification {
             case .unconfirmed:
-                decisions[entry.key] = .unconfirmed(error: failure.message)
+                let backoff = policy.delay(forAttempt: entry.attempt + 1, jitter: jitter)
+                decisions[entry.key] = .unconfirmed(delay: backoff, error: failure.message)
             case .retryable:
                 let backoff = policy.delay(forAttempt: entry.attempt + 1, jitter: jitter)
                 // A server that says "come back in 60 s" knows more than our

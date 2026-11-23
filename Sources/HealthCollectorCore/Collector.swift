@@ -41,6 +41,8 @@ public final class AnchorStore {
     public let directory: URL
     private let fileURL: URL
     private var cursors: [String: String]
+    /// Same model as `OutboxStore`: single owner, lock for cross-queue reads.
+    private let lock = NSLock()
 
     public init(directory: URL) throws {
         self.directory = directory
@@ -60,28 +62,38 @@ public final class AnchorStore {
     }
 
     public func cursor(for type: String) -> String? {
-        cursors[type]
+        lock.lock()
+        defer { lock.unlock() }
+        return cursors[type]
     }
 
     /// Passing `nil` drops the cursor back to full history. The caller is
     /// responsible for having decided that a full re-import is safe — with
     /// `(user, uuid)` identity and server-side tombstones, it is.
     public func save(_ cursor: String?, for type: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
         cursors[type] = cursor
         try persist()
     }
 
     public func isFullHistory(for type: String) -> Bool {
-        cursors[type] == nil
+        lock.lock()
+        defer { lock.unlock() }
+        return cursors[type] == nil
     }
 
     public func resetAll() throws {
+        lock.lock()
+        defer { lock.unlock() }
         cursors = [:]
         try persist()
     }
 
     public var types: [String] {
-        cursors.keys.sorted()
+        lock.lock()
+        defer { lock.unlock() }
+        return cursors.keys.sorted()
     }
 }
 

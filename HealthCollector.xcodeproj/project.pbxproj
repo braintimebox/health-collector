@@ -8,10 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		C0DEC0DE0000000000000001 /* HealthCollectorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE0000000000000011 /* HealthCollectorApp.swift */; };
+		C0DEC0DE0000000000000003 /* HealthKitSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE0000000000000013 /* HealthKitSource.swift */; };
+		C0DEC0DE0000000000000005 /* Runtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE0000000000000015 /* Runtime.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		C0DEC0DE0000000000000011 /* HealthCollectorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthCollectorApp.swift; sourceTree = "<group>"; };
+		C0DEC0DE0000000000000013 /* HealthKitSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSource.swift; sourceTree = "<group>"; };
+		C0DEC0DE0000000000000015 /* Runtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime.swift; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000013 /* HealthCollector.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthCollector.entitlements; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000014 /* HealthCollector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -40,6 +44,8 @@
 			isa = PBXGroup;
 			children = (
 				C0DEC0DE0000000000000011 /* HealthCollectorApp.swift */,
+				C0DEC0DE0000000000000013 /* HealthKitSource.swift */,
+				C0DEC0DE0000000000000015 /* Runtime.swift */,
 				C0DEC0DE0000000000000012 /* Info.plist */,
 				C0DEC0DE0000000000000013 /* HealthCollector.entitlements */,
 			);
@@ -123,6 +129,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DEC0DE0000000000000001 /* HealthCollectorApp.swift in Sources */,
+				C0DEC0DE0000000000000003 /* HealthKitSource.swift in Sources */,
+				C0DEC0DE0000000000000005 /* Runtime.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

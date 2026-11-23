@@ -188,16 +188,21 @@ final class SyncTests: XCTestCase {
         XCTAssertEqual(report.unconfirmed, 2)
         XCTAssertEqual(report.accepted, 0)
         XCTAssertEqual(store.pendingCount, 2)
-        XCTAssertEqual(try XCTUnwrap(store.all.first).attempt, 0, "an unreadable answer is not a failed attempt")
-        XCTAssertEqual(
-            try XCTUnwrap(store.all.first).nextAttemptAt.timeIntervalSince1970,
+        // BUG-02: an unreadable ack is still not a failure — but it is no longer
+        // retried on the very next clock tick, which turned a struggling server
+        // into a client hammering it. The attempt counter advances only to drive
+        // the bounded backoff, and an unconfirmed row is never dead-lettered.
+        let first = try XCTUnwrap(store.all.first)
+        XCTAssertEqual(first.attempt, 1, "attempt advances only to bound the backoff")
+        XCTAssertGreaterThan(
+            first.nextAttemptAt.timeIntervalSince1970,
             t0.addingTimeInterval(1).timeIntervalSince1970,
-            accuracy: 0.001,
-            "and it is retried immediately, because the server may well have stored it"
+            "an unreadable answer must wait, not retry on the same tick"
         )
+        XCTAssertTrue(first.state == .pending, "unconfirmed rows stay queued, never dead")
 
         server.ackMode = .all
-        let second = try engine.drain(now: t0.addingTimeInterval(2))
+        let second = try engine.drain(now: first.nextAttemptAt.addingTimeInterval(1))
         XCTAssertEqual(second.accepted, 2)
         XCTAssertEqual(server.rowCount, 2, "idempotency makes the resend free")
     }

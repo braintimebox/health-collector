@@ -70,6 +70,36 @@ jobs:
             CODE_SIGN_IDENTITY="" \
           2>&1 | tee xcodebuild.log
 
+      - name: Verify the app really carries core and HealthKit
+        run: |
+          set -euo pipefail
+          app="build/HealthCollector.app"
+          bin="${app}/HealthCollector"
+          echo "== linked frameworks =="
+          otool -L "$bin" | tee /tmp/otool.txt
+          # 1. HealthKit must be linked: without it every HK call would be a stub
+          #    and the app would look healthy while reading nothing.
+          grep -q "HealthKit.framework" /tmp/otool.txt || {
+            echo "HealthKit.framework is not linked into the app binary" >&2; exit 1; }
+
+          # 2. The app target must actually contain the collector core, not just
+          #    declare it in Package.swift. A static link inlines symbols, so the
+          #    check looks for the compiled types of the core in the binary.
+          echo "== core symbols =="
+          nm -gU "$bin" 2>/dev/null | grep -E "HealthCollectorCore" | head -20 || true
+          strings "$bin" | grep -q "OutboxStore" || {
+            echo "HealthCollectorCore does not appear to be linked into the app" >&2; exit 1; }
+          strings "$bin" | grep -q "HealthKitSource" || {
+            echo "HealthKitSource is missing from the app binary" >&2; exit 1; }
+
+          # 3. The source tree must import the module: an empty target that merely
+          #    links would pass the binary checks above.
+          grep -rq "import HealthCollectorCore" HealthCollector/ || {
+            echo "no source file imports HealthCollectorCore" >&2; exit 1; }
+          grep -rq "import HealthKit" HealthCollector/ || {
+            echo "no source file imports HealthKit" >&2; exit 1; }
+          echo "OK: core linked, HealthKit linked, sources import both"
+
       - name: Assert the bundle is complete
         run: |
           set -euo pipefail

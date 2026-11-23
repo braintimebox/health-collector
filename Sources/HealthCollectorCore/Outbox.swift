@@ -48,8 +48,10 @@ public enum Settlement: Equatable {
     case accepted
     case retry(delay: TimeInterval, error: String)
     case dead(error: String)
-    /// The ack could not be read. Neither success nor failure: resend later.
-    case unconfirmed(error: String)
+    /// The ack could not be read. Neither success nor failure: resend later,
+    /// but never in a tight loop — an unreadable answer repeated every drain is
+    /// exactly how a client hammers a server that is already struggling.
+    case unconfirmed(delay: TimeInterval, error: String)
 }
 
 // MARK: - Store
@@ -64,6 +66,10 @@ public final class OutboxStore {
     public let directory: URL
     private let fileURL: URL
     private var entries: [OutboxEntry]
+    /// Concurrency model: one writer (the sync engine on the app's serial
+    /// queue). The lock is defence in depth for diagnostics read from another
+    /// queue, not a licence to mutate from several threads.
+    private let lock = NSLock()
 
     public init(directory: URL) throws {
         self.directory = directory
@@ -98,7 +104,9 @@ public final class OutboxStore {
     public var all: [OutboxEntry] { entries }
 
     public func entry(forKey key: String) -> OutboxEntry? {
-        entries.first { $0.key == key }
+        lock.lock()
+        defer { lock.unlock() }
+        return entries.first { $0.key == key }
     }
 
     public var pendingCount: Int { entries.filter { $0.state == .pending }.count }
@@ -107,32 +115,45 @@ public final class OutboxStore {
     public var ackedCount: Int { entries.filter { $0.state == .acked }.count }
 
     public var queueDepth: Int {
-        entries.filter { $0.state == .pending || $0.state == .inflight }.count
+        lock.lock()
+        defer { lock.unlock() }
+        return entries.filter { $0.state == .pending || $0.state == .inflight }.count
     }
 
     /// Age of the oldest row that still owes the server something. This is the
     /// number a status panel can trust; a cumulative "sent" counter proves
     /// nothing because it can never go down.
     public func oldestPendingAge(now: Date) -> TimeInterval? {
+        lock.lock()
+        defer { lock.unlock() }
         let outstanding = entries
             .filter { $0.state == .pending || $0.state == .inflight }
             .map { now.timeIntervalSince($0.createdAt) }
-        return outstanding.min()
+        // BUG-01: this is the age of the OLDEST outstanding row, so the largest
+        // interval. `min()` reported the freshest row and made a queue that had
+        // been stuck for a day look seconds old.
+        return outstanding.max()
     }
 
     public func lastAcceptedAt() -> Date? {
-        entries.compactMap { $0.acceptedAt }.max()
+        lock.lock()
+        defer { lock.unlock() }
+        return entries.compactMap { $0.acceptedAt }.max()
     }
 
     /// When the collector last put something in the queue, whatever happened to
     /// it afterwards. This is the anchor for "is this silence or is it empty":
     /// a green panel needs a recent row, not a recent run.
     public func latestRowAt() -> Date? {
-        entries.map { $0.createdAt }.max()
+        lock.lock()
+        defer { lock.unlock() }
+        return entries.map { $0.createdAt }.max()
     }
 
     public func lastError() -> String? {
-        entries.reversed().compactMap { $0.lastError }.first
+        lock.lock()
+        defer { lock.unlock() }
+        return entries.reversed().compactMap { $0.lastError }.first
     }
 
     // MARK: Writing
@@ -142,6 +163,8 @@ public final class OutboxStore {
     /// server's constraint, never a replacement for it.
     @discardableResult
     public func enqueue(_ payload: OutboxPayload, now: Date) throws -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
         let key = payload.outboxKey
         if entries.contains(where: { $0.key == key }) {
             return false
@@ -154,6 +177,8 @@ public final class OutboxStore {
     /// Take up to `limit` rows that are due, marking them inflight in the same
     /// write. Oldest first, so a long outage drains in the order it accumulated.
     public func claim(now: Date, limit: Int) throws -> [OutboxEntry] {
+        lock.lock()
+        defer { lock.unlock() }
         guard limit > 0 else { return [] }
         let due = entries
             .filter { $0.state == .pending && $0.nextAttemptAt <= now }
@@ -164,7 +189,19 @@ public final class OutboxStore {
             }
             .prefix(limit)
         guard !due.isEmpty else { return [] }
-        let claimed = Array(due)
+        // BUG-03: the server's ack names a record_id, not an operation. An insert
+        // and a delete for the same identity in one batch would make that answer
+        // ambiguous — both rows would be settled by a single id. Keep each batch
+        // to one operation per identity; the other row waits for the next drain.
+        var seenIdentities = Set<String>()
+        var claimed: [OutboxEntry] = []
+        for entry in due {
+            let identity = entry.payload.identity.canonicalKey
+            guard !seenIdentities.contains(identity) else { continue }
+            seenIdentities.insert(identity)
+            claimed.append(entry)
+        }
+        guard !claimed.isEmpty else { return [] }
         let keys = Set(claimed.map { $0.key })
         for index in entries.indices where keys.contains(entries[index].key) {
             entries[index].state = .inflight
@@ -175,6 +212,8 @@ public final class OutboxStore {
 
     /// Apply the server's answer to every claimed row in one write.
     public func settle(_ decisions: [String: Settlement], now: Date) throws {
+        lock.lock()
+        defer { lock.unlock() }
         var changed = false
         for index in entries.indices {
             guard let decision = decisions[entries[index].key] else { continue }
@@ -192,9 +231,10 @@ public final class OutboxStore {
                 entries[index].state = .dead
                 entries[index].attempt += 1
                 entries[index].lastError = error
-            case let .unconfirmed(error):
+            case let .unconfirmed(delay, error):
                 entries[index].state = .pending
-                entries[index].nextAttemptAt = now
+                entries[index].attempt += 1
+                entries[index].nextAttemptAt = now.addingTimeInterval(delay)
                 entries[index].lastError = error
             }
         }
@@ -206,6 +246,8 @@ public final class OutboxStore {
     /// Put every inflight row back without changing its attempt count. Used when
     /// the process is about to be suspended mid-batch.
     public func requeueInflight() throws {
+        lock.lock()
+        defer { lock.unlock() }
         var changed = false
         for index in entries.indices where entries[index].state == .inflight {
             entries[index].state = .pending
@@ -217,8 +259,19 @@ public final class OutboxStore {
     }
 
     /// Drop rows the server has confirmed. Never touches pending or dead rows.
-    public func pruneAcked() throws {
-        let kept = entries.filter { $0.state != .acked }
+    ///
+    /// `keeping` keeps the newest acked rows so the diagnostics panel can still
+    /// answer "when did the last successful send happen". Without a call to this
+    /// the queue grows forever: acked rows were never pruned at all.
+    public func pruneAcked(keeping: Int = 200) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        let acked = entries.filter { $0.state == .acked }
+        guard acked.count > keeping else { return }
+        let survivors = Set(
+            acked.sorted { $0.createdAt > $1.createdAt }.prefix(keeping).map { $0.key }
+        )
+        let kept = entries.filter { $0.state != .acked || survivors.contains($0.key) }
         guard kept.count != entries.count else { return }
         entries = kept
         try persist()
