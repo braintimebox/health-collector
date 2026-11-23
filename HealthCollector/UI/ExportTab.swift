@@ -1,4 +1,5 @@
 import SwiftUI
+import HealthCollectorCore
 
 struct ExportTab: View {
     @ObservedObject var runtime: CollectorRuntime
