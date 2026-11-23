@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SettingsTab: View {
     @ObservedObject var runtime: CollectorRuntime
+    var initialRoute: String?
+    @State private var pushed: String?
 
     var body: some View {
         List {
@@ -14,6 +16,17 @@ struct SettingsTab: View {
                 NavigationLink("About") { AboutView() }
                 Text("Every value on these screens comes from the collector's stored state or from HealthKit. Nothing is a demo value.").font(.caption).foregroundStyle(.secondary)
             }
+        }
+        .navigationDestination(item: $pushed) { title in
+            switch title {
+            case "Advanced": AdvancedView(runtime: runtime)
+            case "Health Permissions": PermissionsView(runtime: runtime)
+            case "Export Settings": ExportSettingsView(runtime: runtime)
+            default: EmptyView()
+            }
+        }
+        .onAppear {
+            if pushed == nil, let initialRoute { pushed = initialRoute }
         }
         .navigationTitle("Settings")
     }

@@ -193,35 +193,43 @@ jobs:
       # tried first: it delivered nothing, the job stayed green, and all three
       # pictures showed the same screen. A launch argument is read before the first
       # render, so it cannot be silently ignored.
-      - name: Install and capture each tab
+      - name: Install and capture each screen
         env:
           UDID: ${{ steps.sim.outputs.udid }}
         run: |
           set -euo pipefail
           xcrun simctl install "${UDID}" build-sim/HealthCollector.app
           mkdir -p screens
-          for tab in export browse settings; do
+          capture () {
+            appearance="$1"; tab="$2"; route="$3"; name="$4"
+            xcrun simctl ui "${UDID}" appearance "${appearance}"
             xcrun simctl terminate "${UDID}" com.braintimebox.healthcollector 2>/dev/null || true
-            xcrun simctl launch "${UDID}" com.braintimebox.healthcollector -uiScreenshots -initialTab "${tab}"
+            if [ -n "${route}" ]; then
+              xcrun simctl launch "${UDID}" com.braintimebox.healthcollector \
+                -uiScreenshots -initialTab "${tab}" -initialRoute "${route}"
+            else
+              xcrun simctl launch "${UDID}" com.braintimebox.healthcollector \
+                -uiScreenshots -initialTab "${tab}"
+            fi
             sleep 4
-            xcrun simctl io "${UDID}" screenshot "screens/${tab}.png"
-          done
+            xcrun simctl io "${UDID}" screenshot "screens/${name}.png"
+          }
+          capture light export   ""        export
+          capture light browse   ""        browse
+          capture light settings ""        settings
+          capture dark  export   ""        dark-export
+          capture dark  browse   ""        dark-browse
+          capture dark  settings ""        dark-settings
+          capture light export   Server    server
+          capture light settings Advanced  advanced
           ls -l screens
-          file screens/*.png
 
-      # A capture job that uploads three copies of one screen is worse than no
-      # capture job: it looks like evidence. Distinct hashes are the cheapest
-      # assertion that the tab actually changed.
-      - name: Assert the screenshots differ
-        run: |
-          set -euo pipefail
-          distinct=$(sha256sum screens/*.png | awk '{print $1}' | sort -u | wc -l | tr -d ' ')
-          echo "distinct screenshots: ${distinct}"
-          if [[ "${distinct}" -ne 3 ]]; then
-            echo "screenshots are not distinct — the tab did not change:" >&2
-            sha256sum screens/*.png >&2
-            exit 1
-          fi
+      # What has to be proven is that each capture shows *its* screen, not merely that
+      # the files differ: three captures a minute apart differ by their clock while
+      # showing one tab. The checker reads the tab bar and asks which third carries the
+      # accent colour, and it fails on two files that landed on the same tab.
+      - name: Assert every capture shows its own screen
+        run: python3 scripts/check-screenshots.py screens
 
       - name: Upload screenshots
         uses: actions/upload-artifact@v7

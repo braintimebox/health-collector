@@ -5,6 +5,7 @@ import SwiftUI
 struct AppShell: View {
     @ObservedObject var runtime: CollectorRuntime
     @State private var selection: Tab = AppShell.initialTab
+    private let route = AppShell.initialRoute
 
     enum Tab: Hashable { case export, browse, settings }
 
@@ -12,6 +13,16 @@ struct AppShell: View {
     /// reliable way to get there: the first attempt delivered nothing and produced
     /// three pictures of the same tab while the job stayed green. A launch argument
     /// cannot be dropped, because the value is read before the first render.
+    /// A nested screen a capture run may land on: `Server` lives under Export,
+    /// `Advanced` under Settings.
+    static var initialRoute: String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-initialRoute"), index + 1 < arguments.count else {
+            return nil
+        }
+        return arguments[index + 1]
+    }
+
     static var initialTab: Tab {
         let arguments = ProcessInfo.processInfo.arguments
         guard let index = arguments.firstIndex(of: "-initialTab"), index + 1 < arguments.count else {
@@ -26,7 +37,7 @@ struct AppShell: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            NavigationStack { ExportTab(runtime: runtime) }
+            NavigationStack { ExportTab(runtime: runtime, initialRoute: selection == .export ? route : nil) }
                 .tabItem { Label("Export", systemImage: "hand.tap") }
                 .tag(Tab.export)
 
@@ -34,7 +45,7 @@ struct AppShell: View {
                 .tabItem { Label("Browse", systemImage: "square.grid.2x2") }
                 .tag(Tab.browse)
 
-            NavigationStack { SettingsTab(runtime: runtime) }
+            NavigationStack { SettingsTab(runtime: runtime, initialRoute: selection == .settings ? route : nil) }
                 .tabItem { Label("Settings", systemImage: "gearshape") }
                 .tag(Tab.settings)
         }

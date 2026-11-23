@@ -3,6 +3,8 @@ import HealthCollectorCore
 
 struct ExportTab: View {
     @ObservedObject var runtime: CollectorRuntime
+    var initialRoute: String?
+    @State private var pushed: String?
 
     private let cards: [(String, String, String)] = [
         ("Manual", "square.and.arrow.up", "Run a collection and send it now"),
@@ -32,6 +34,10 @@ struct ExportTab: View {
                 .padding(.bottom)
         }
         .background(Color(.systemGroupedBackground))
+        .navigationDestination(item: $pushed) { title in destination(title) }
+        .onAppear {
+            if pushed == nil, let initialRoute { pushed = initialRoute }
+        }
         .navigationTitle("Export")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
