@@ -200,6 +200,28 @@ final class SyncTests: XCTestCase {
         XCTAssertEqual(server.rowCount, 2, "idempotency makes the resend free")
     }
 
+    func testSilenceIsNotCalledHealthy() throws {
+        let dir = try TempDirectory()
+        let store = try makeStore(dir)
+        let anchors = try AnchorStore(directory: try dir.child("anchors"))
+        let server = FakeServer()
+        try store.enqueue(.insert(makeRecord(1)), now: t0)
+
+        let engine = SyncEngine(userID: "user-1", store: store, transport: server)
+        _ = try engine.drain(now: t0)
+
+        let fresh = CollectorStatus.make(store: store, anchors: anchors, types: [], now: t0.addingTimeInterval(3600))
+        XCTAssertEqual(fresh.verdict, .healthy)
+        XCTAssertNotNil(fresh.lastNewRowAt, "health needs a recent row, not just a recent run")
+
+        // Nothing new for a day and a half. From inside the app this is exactly what
+        // a revoked read permission looks like — HealthKit answers like an empty day
+        // — so it must not be reported as health.
+        let silent = CollectorStatus.make(store: store, anchors: anchors, types: [], now: t0.addingTimeInterval(40 * 3600))
+        XCTAssertEqual(silent.verdict, .degraded)
+        XCTAssertTrue(silent.diagnosticText(appVersion: "0.1.0", apiVersion: "1").contains("Status: DEGRADED"))
+    }
+
     func testStatusComesFromTheStore() throws {
         let dir = try TempDirectory()
         let store = try makeStore(dir)

@@ -75,7 +75,7 @@ final class ReimportTests: XCTestCase {
         )
     }
 
-    func testAuthorizationDeniedIsDiagnosableAndChangesNothing() throws {
+    func testAuthorizationFailurePropagatesAndDoesNotAdvanceCursor() throws {
         let dir = try TempDirectory()
         let store = try OutboxStore(directory: try dir.child("outbox"))
         let anchorsDir = try dir.child("anchors")

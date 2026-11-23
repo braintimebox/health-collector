@@ -1,0 +1,54 @@
+# Reliability core of the Health Collector, tested without a device.
+#
+# The app target (com.braintimebox.healthcollector) needs a Mac with a signing
+# identity: no HealthKit fact can be measured without a signed build on a phone.
+# This workflow covers the other half — the part that is genuinely provable
+# off-device: the durable outbox, retry classification, per-record acks,
+# tombstones, cursors, and the file a background upload reads.
+#
+# Paths are rooted at the repository root: the package manifest lives beside
+# Sources/ and Tests/, not under a Packages/ directory. A filter naming a
+# directory this repository does not have makes the workflow run zero times,
+# which reads as "CI is not configured" rather than "the filter is wrong".
+
+name: Health Collector Core
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: health-collector-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: swift test
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Test
+        run: |
+          set -euo pipefail
+          swift test 2>&1 | tee swift-test.log
+
+      - name: Upload log on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: swift-test-log
+          path: swift-test.log
+          if-no-files-found: ignore

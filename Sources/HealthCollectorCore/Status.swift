@@ -34,11 +34,18 @@ public struct CollectorStatus: Equatable {
 
     public static let degradedThreshold: TimeInterval = 6 * 3600
     public static let stallThreshold: TimeInterval = 24 * 3600
+    /// No new row for this long is not "healthy". After a read permission is
+    /// revoked, HealthKit answers exactly like an empty day, so the only honest
+    /// signal left is that nothing arrived for a long time — and silence must not
+    /// be dressed as health.
+    public static let silenceThreshold: TimeInterval = 36 * 3600
 
     public let queueDepth: Int
     public let deadLettered: Int
     public let oldestPendingAge: TimeInterval?
     public let lastSuccessAt: Date?
+    /// When a measurement last entered the queue, regardless of what happened to it.
+    public let lastNewRowAt: Date?
     public let lastError: String?
     public let permissions: PermissionState
     public let backgroundDelivery: BackgroundDeliveryState
@@ -51,6 +58,7 @@ public struct CollectorStatus: Equatable {
         deadLettered: Int,
         oldestPendingAge: TimeInterval?,
         lastSuccessAt: Date?,
+        lastNewRowAt: Date?,
         lastError: String?,
         permissions: PermissionState,
         backgroundDelivery: BackgroundDeliveryState,
@@ -61,6 +69,7 @@ public struct CollectorStatus: Equatable {
         self.deadLettered = deadLettered
         self.oldestPendingAge = oldestPendingAge
         self.lastSuccessAt = lastSuccessAt
+        self.lastNewRowAt = lastNewRowAt
         self.lastError = lastError
         self.permissions = permissions
         self.backgroundDelivery = backgroundDelivery
@@ -80,6 +89,7 @@ public struct CollectorStatus: Equatable {
         let dead = store.deadCount
         let age = store.oldestPendingAge(now: now)
         let lastSuccess = store.lastAcceptedAt()
+        let lastRow = store.latestRowAt()
         let fullHistory = types.filter { anchors.isFullHistory(for: $0) }
 
         let verdict: Verdict
@@ -89,6 +99,11 @@ public struct CollectorStatus: Equatable {
             verdict = .stalled
         } else if depth == 0, lastSuccess == nil {
             verdict = .idle
+        } else if let reference = lastRow ?? lastSuccess, now.timeIntervalSince(reference) > silenceThreshold {
+            // Nothing new for a day and a half with an empty queue: an empty day,
+            // a revoked read permission, or a dead pipeline. We cannot tell which,
+            // so we do not call it healthy.
+            verdict = .degraded
         } else if let age, age > degradedThreshold {
             verdict = .degraded
         } else {
@@ -100,6 +115,7 @@ public struct CollectorStatus: Equatable {
             deadLettered: dead,
             oldestPendingAge: age,
             lastSuccessAt: lastSuccess,
+            lastNewRowAt: lastRow,
             lastError: store.lastError(),
             permissions: permissions,
             backgroundDelivery: backgroundDelivery,
@@ -117,6 +133,7 @@ public struct CollectorStatus: Equatable {
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 
         let lastSuccess = lastSuccessAt.map { formatter.string(from: $0) } ?? "never"
+        let lastRow = lastNewRowAt.map { formatter.string(from: $0) } ?? "never"
         let oldest = oldestPendingAge.map { String(format: "%.1fh", $0 / 3600) } ?? "-"
 
         return """
@@ -127,6 +144,7 @@ public struct CollectorStatus: Equatable {
         Oldest Pending: \(oldest)
         Dead-lettered: \(deadLettered)
         Last Success: \(lastSuccess)
+        Last New Row: \(lastRow)
         Last Error: \(lastError ?? "-")
         Full History Types: \(fullHistoryTypes.isEmpty ? "-" : fullHistoryTypes.joined(separator: ", "))
         App: \(appVersion)  API: \(apiVersion)

@@ -38,6 +38,9 @@ Tests/HealthCollectorCoreTests/
 | Same batch twice → one row | ✅ | |
 | Partial ack → only unacked resent | ✅ | |
 | Unreadable ack → unconfirmed, resent | ✅ | |
+| Batch is on disk before a background upload reads it | ✅ spool file asserted at send | |
+| `handleEventsForBackgroundURLSession` re-arms the next batch | ✅ | |
+| Nothing new for 36 h is not called HEALTHY | ✅ | |
 | Delete stays deleted after a full reimport (A7) | ✅ tombstones in the fake server | |
 | Locked store ≠ empty store | ✅ at the seam | real locked device |
 | Observer / background delivery wake | | ✅ |
@@ -59,6 +62,16 @@ Tests/HealthCollectorCoreTests/
   unreadable answer is `unconfirmed`: resend, because idempotency makes it free.
 - **Status comes from the store.** Queue depth and the age of the oldest unacked row are
   derivable and checkable; "the app ran" is not.
+
+## Background transfer
+
+The batch is written to disk (`BatchSpool`) before the transport sees it, because
+a background `URLSession` uploads from a file and survives the process. The wake
+that iOS sends when that upload finishes is handled by `BackgroundWake`: settle the
+finished file, then arm the *next* one — otherwise the trigger fires once and the
+outbox stays full. A force-quit cancels the transfers and suppresses the relaunch,
+so recovery after force-quit happens on the next manual launch, and that is a
+platform rule, not a defect.
 
 ## Run
 

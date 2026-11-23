@@ -124,6 +124,13 @@ public final class OutboxStore {
         entries.compactMap { $0.acceptedAt }.max()
     }
 
+    /// When the collector last put something in the queue, whatever happened to
+    /// it afterwards. This is the anchor for "is this silence or is it empty":
+    /// a green panel needs a recent row, not a recent run.
+    public func latestRowAt() -> Date? {
+        entries.map { $0.createdAt }.max()
+    }
+
     public func lastError() -> String? {
         entries.reversed().compactMap { $0.lastError }.first
     }
