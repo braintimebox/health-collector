@@ -64,7 +64,6 @@ jobs:
             -target HealthCollector \
             -configuration Release \
             -sdk iphoneos \
-            -derivedDataPath "${{ runner.temp }}/DerivedData" \
             CONFIGURATION_BUILD_DIR="$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
