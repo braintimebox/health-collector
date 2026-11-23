@@ -8,15 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		C0DEC0DE0000000000000001 /* HealthCollectorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE0000000000000011 /* HealthCollectorApp.swift */; };
-		C0DEC0DE0000000000000003 /* HealthKitSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE0000000000000013 /* HealthKitSource.swift */; };
-		C0DEC0DE0000000000000063 /* HealthCollectorCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DEC0DE0000000000000062 /* HealthCollectorCore */; };
-		C0DEC0DE0000000000000005 /* Runtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE0000000000000015 /* Runtime.swift */; };
+		C0DEC0DE00000000000000A3 /* HealthKitSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE00000000000000A2 /* HealthKitSource.swift */; };
+		C0DEC0DE00000000000000A6 /* HealthCollectorCore in Frameworks */ = {isa = PBXBuildFile; productRef = C0DEC0DE00000000000000A1 /* HealthCollectorCore */; };
+		C0DEC0DE00000000000000A5 /* Runtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE00000000000000A4 /* Runtime.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		C0DEC0DE0000000000000011 /* HealthCollectorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthCollectorApp.swift; sourceTree = "<group>"; };
-		C0DEC0DE0000000000000013 /* HealthKitSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSource.swift; sourceTree = "<group>"; };
-		C0DEC0DE0000000000000015 /* Runtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime.swift; sourceTree = "<group>"; };
+		C0DEC0DE00000000000000A2 /* HealthKitSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSource.swift; sourceTree = "<group>"; };
+		C0DEC0DE00000000000000A4 /* Runtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runtime.swift; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000013 /* HealthCollector.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthCollector.entitlements; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000014 /* HealthCollector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -27,7 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0DEC0DE0000000000000063 /* HealthCollectorCore in Frameworks */,
+				C0DEC0DE00000000000000A6 /* HealthCollectorCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,8 +46,8 @@
 			isa = PBXGroup;
 			children = (
 				C0DEC0DE0000000000000011 /* HealthCollectorApp.swift */,
-				C0DEC0DE0000000000000013 /* HealthKitSource.swift */,
-				C0DEC0DE0000000000000015 /* Runtime.swift */,
+				C0DEC0DE00000000000000A2 /* HealthKitSource.swift */,
+				C0DEC0DE00000000000000A4 /* Runtime.swift */,
 				C0DEC0DE0000000000000012 /* Info.plist */,
 				C0DEC0DE0000000000000013 /* HealthCollector.entitlements */,
 			);
@@ -79,7 +79,7 @@
 			);
 			name = HealthCollector;
 			packageProductDependencies = (
-				C0DEC0DE0000000000000062 /* HealthCollectorCore */,
+				C0DEC0DE00000000000000A1 /* HealthCollectorCore */,
 			);
 			productName = HealthCollector;
 			productReference = C0DEC0DE0000000000000014 /* HealthCollector.app */;
@@ -110,7 +110,7 @@
 			);
 			mainGroup = C0DEC0DE0000000000000021;
 			packageReferences = (
-				C0DEC0DE0000000000000061 /* XCLocalSwiftPackageReference "." */,
+				C0DEC0DE00000000000000A0 /* XCLocalSwiftPackageReference "." */,
 			);
 			productRefGroup = C0DEC0DE0000000000000023 /* Products */;
 			projectDirPath = "";
@@ -137,8 +137,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DEC0DE0000000000000001 /* HealthCollectorApp.swift in Sources */,
-				C0DEC0DE0000000000000003 /* HealthKitSource.swift in Sources */,
-				C0DEC0DE0000000000000005 /* Runtime.swift in Sources */,
+				C0DEC0DE00000000000000A3 /* HealthKitSource.swift in Sources */,
+				C0DEC0DE00000000000000A5 /* Runtime.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,14 +258,14 @@
 		};
 /* End XCConfigurationList section */
 /* Begin XCLocalSwiftPackageReference section */
-		C0DEC0DE0000000000000061 /* XCLocalSwiftPackageReference "." */ = {
+		C0DEC0DE00000000000000A0 /* XCLocalSwiftPackageReference "." */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = .;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		C0DEC0DE0000000000000062 /* HealthCollectorCore */ = {
+		C0DEC0DE00000000000000A1 /* HealthCollectorCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = HealthCollectorCore;
 		};
@@ -275,3 +275,4 @@
 	};
 	rootObject = C0DEC0DE0000000000000041 /* Project object */;
 }
+

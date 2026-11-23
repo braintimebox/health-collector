@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import plistlib
 import re
+import collections
 import sys
 from pathlib import Path
 
@@ -271,10 +272,27 @@ def check_pbxproj() -> None:
 
 
 # --------------------------------------------------------------------------- #
+
+def check_unique_object_ids() -> None:
+    """Two objects with one ID make xcodebuild report a file 'in multiple groups'.
+
+    The error names a group membership, not the collision, so it costs a whole
+    CI cycle to find. Cheaper to refuse the project here.
+    """
+    if not PROJECT.is_file():
+        return
+    text = PROJECT.read_text()
+    ids = re.findall(r"^\t\t(C0DEC0DE[0-9A-F]{16}) /\*.*?\*/ = \{", text, re.M)
+    duplicates = [key for key, count in collections.Counter(ids).items() if count > 1]
+    if duplicates:
+        fail(f"дубликат object id в project.pbxproj: {duplicates[:4]}")
+
+
 def main() -> int:
     check_entitlements()
     check_info_plist()
     check_pbxproj()
+    check_unique_object_ids()
 
     for message in warnings:
         print(f"WARN: {message}")
