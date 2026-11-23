@@ -13,8 +13,7 @@ struct HealthCollectorApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RuntimeView(runtime: runtime)
-                .task { runtime.start() }
+            AppShell(runtime: runtime)
         }
     }
 }

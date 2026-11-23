@@ -13,12 +13,17 @@ import SwiftUI
 final class CollectorRuntime: ObservableObject {
 
     struct Snapshot {
-        var permissions: String = "unknown"
+        var permissions: String = "not requested"
+        var backgroundDelivery: String = "unknown (not observable)"
         var queueDepth: Int = 0
+        var deadCount: Int = 0
+        var oldestPending: TimeInterval?
+        var lastSuccessAt: Date?
         var collected: Int = 0
         var accepted: Int = 0
         var lastRunAt: Date?
         var lastError: String?
+        var serverStatus: String = "not checked"
         var detail: String = "idle"
     }
 
@@ -26,19 +31,21 @@ final class CollectorRuntime: ObservableObject {
 
     private let queue = DispatchQueue(label: "healthcollector.runtime", qos: .utility)
     private let userID = "owner"
-    private let baseURL = URL(string: "https://hermes00.duckdns.org:1118")!
-    private let token: String
 
     private let source: HealthKitSource
     private let outbox: OutboxStore?
     private let anchors: AnchorStore?
     private let storeError: String?
 
+    /// Endpoint and token come from settings, not from the binary: a token baked
+    /// into an IPA is a token in every copy of that IPA.
+    private var baseURL: URL {
+        URL(string: AppSettings.serverURL) ?? URL(string: "https://hermes00.duckdns.org:1118")!
+    }
+
+    private var token: String { AppSettings.token }
+
     init() {
-        let env = ProcessInfo.processInfo.environment
-        self.token = env["HEALTH_COLLECTOR_TOKEN"]
-            ?? Bundle.main.object(forInfoDictionaryKey: "HCToken") as? String
-            ?? ""
         self.source = HealthKitSource(userID: "owner")
 
         var outbox: OutboxStore?
@@ -75,6 +82,60 @@ final class CollectorRuntime: ObservableObject {
         }
     }
 
+    func requestPermissions() {
+        Task {
+            do {
+                try await source.requestAuthorization()
+                snapshot.permissions = "requested (read status not observable)"
+            } catch {
+                snapshot.permissions = "request failed"
+                snapshot.lastError = "\(error)"
+            }
+        }
+    }
+
+    /// Проверка соединения — это GET по тому же базовому адресу, что и приём.
+    /// Ничего не отправляет и ничего не подтверждает.
+    func testServer(completion: @escaping (String) -> Void) {
+        var request = URLRequest(url: baseURL.appendingPathComponent("v1/health"))
+        request.timeoutInterval = 10
+        if !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            let result: String
+            if let error {
+                result = "unreachable: \(error.localizedDescription)"
+            } else if let http = response as? HTTPURLResponse {
+                result = (200...299).contains(http.statusCode) ? "ok (\(http.statusCode))" : "HTTP \(http.statusCode)"
+            } else {
+                result = "no response"
+            }
+            Task { @MainActor in
+                self?.snapshot.serverStatus = result
+                completion(result)
+            }
+        }.resume()
+    }
+
+    /// Диагностика без секретов и без значений измерений.
+    func diagnosticsText() -> String {
+        let host = URL(string: AppSettings.serverURL)?.host ?? "?"
+        let snapshot = self.snapshot
+        return [
+            "HealthCollector",
+            "queue_depth=\(snapshot.queueDepth)",
+            "dead_letter=\(snapshot.deadCount)",
+            "oldest_pending_s=\(Int(snapshot.oldestPending ?? 0))",
+            "last_success=\(snapshot.lastSuccessAt.map { ISO8601DateFormatter().string(from: $0) } ?? "never")",
+            "last_run=\(snapshot.lastRunAt.map { ISO8601DateFormatter().string(from: $0) } ?? "never")",
+            "permissions=\(snapshot.permissions)",
+            "server_host=\(host)",
+            "token_configured=\(AppSettings.hasToken)",
+            "last_error=\(snapshot.lastError ?? "none")",
+        ].joined(separator: "\n")
+    }
+
     func syncNow(reason: String) {
         guard let outbox, let anchors else {
             snapshot.lastError = storeError ?? "storage unavailable"
@@ -101,6 +162,9 @@ final class CollectorRuntime: ObservableObject {
             Task { @MainActor in
                 guard let self else { return }
                 self.snapshot.queueDepth = status.queueDepth
+                self.snapshot.deadCount = status.deadLettered
+                self.snapshot.oldestPending = status.oldestPendingAge
+                self.snapshot.lastSuccessAt = status.lastSuccessAt
                 self.snapshot.collected = collected
                 self.snapshot.accepted = accepted
                 self.snapshot.lastRunAt = Date()
@@ -157,51 +221,5 @@ struct URLSessionTransport: OutboxTransport {
         case let .failure(failure): throw failure
         case .none: throw TransportFailure(kind: .transport, message: "no outcome")
         }
-    }
-}
-
-struct RuntimeView: View {
-    @ObservedObject var runtime: CollectorRuntime
-
-    var body: some View {
-        let snapshot = runtime.snapshot
-        VStack(alignment: .leading, spacing: 8) {
-            row("HealthKit", snapshot.permissions)
-            row("Local queue", "\(snapshot.queueDepth)")
-            row("New rows", "\(snapshot.collected)")
-            row("Accepted", "\(snapshot.accepted)")
-            row("Last run", snapshot.lastRunAt.map { Self.formatter.string(from: $0) } ?? "never")
-            row("Trigger", snapshot.detail)
-            if let error = snapshot.lastError {
-                Text(error).font(.footnote).foregroundStyle(.red)
-            }
-            Spacer()
-            Button("Sync now") { runtime.syncNow(reason: "manual") }
-                .buttonStyle(.borderedProminent)
-            Text(buildIdentity).font(.caption.monospaced()).foregroundStyle(.secondary)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func row(_ name: String, _ value: String) -> some View {
-        HStack {
-            Text(name).font(.callout)
-            Spacer()
-            Text(value).font(.callout.monospaced())
-        }
-    }
-
-    private static let formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss"
-        return formatter
-    }()
-
-    private var buildIdentity: String {
-        let info = Bundle.main.infoDictionary
-        let short = info?["CFBundleShortVersionString"] as? String ?? "?"
-        let build = info?["CFBundleVersion"] as? String ?? "?"
-        return "\(info?["CFBundleIdentifier"] as? String ?? "?") \(short) (\(build))"
     }
 }
