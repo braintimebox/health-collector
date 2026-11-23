@@ -59,7 +59,19 @@ final class HealthKitSource: HealthSource {
         return out
     }()
 
-    static var supportedTypes: [String] { mappings.map(\.wireType) }
+    /// Types the collector asks for: the mapped sample types plus the sleep stages,
+    /// which share one HK type (`sleepAnalysis`) but travel as distinct wire types.
+    static var supportedTypes: [String] {
+        mappings.map(\.wireType).filter { $0 != "sleep_analysis" } + SleepStage.wireTypes
+    }
+
+    /// A stage type resolves to the one `sleepAnalysis` sample type, so a per-stage
+    /// cursor still queries the same HK type and keeps its own anchor.
+    static func mapping(for type: String) -> TypeMapping? {
+        if let direct = mappings.first(where: { $0.wireType == type }) { return direct }
+        guard SleepStage.allCases.contains(where: { $0.wireType == type }) else { return nil }
+        return mappings.first { $0.wireType == "sleep_analysis" }
+    }
 
     private let store = HKHealthStore()
     private let userID: String
@@ -110,7 +122,7 @@ final class HealthKitSource: HealthSource {
     // MARK: Fetch
 
     func fetch(for type: String, since cursor: String?) throws -> FetchResult {
-        guard let mapping = Self.mappings.first(where: { $0.wireType == type }) else {
+        guard let mapping = Self.mapping(for: type) else {
             throw SourceError.queryFailed("unknown type \(type)")
         }
         let anchor = AnchorCodec.decode(cursor)
@@ -195,10 +207,22 @@ final class HealthKitSource: HealthSource {
 
         if let category = sample as? HKCategorySample {
             guard mapping.wireType == "sleep_analysis" else { return nil }
-            // One row per stage, in hours: flattening a night into a single number
-            // is exactly what the requirement forbids.
+            // One row per segment, in hours, and the stage travels in the type:
+            // `sleep_analysis` alone would make deep, REM and awake rows identical.
             let hours = category.endDate.timeIntervalSince(category.startDate) / 3600
-            return make(hours, "h")
+            let stage = SleepStage.from(categoryValue: category.value)
+            let record = make(hours, "h")
+            return HealthRecord(
+                identity: record.identity,
+                type: stage.wireType,
+                value: record.value,
+                unit: record.unit,
+                startDate: record.startDate,
+                endDate: record.endDate,
+                timeZone: record.timeZone,
+                sourceName: record.sourceName,
+                sourceID: record.sourceID
+            )
         }
 
         if let workout = sample as? HKWorkout {
