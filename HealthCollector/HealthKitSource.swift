@@ -1,4 +1,5 @@
 import Foundation
+import HealthCollectorCore
 import HealthKit
 
 /// The real HealthKit source. It is the only file in this app that talks to

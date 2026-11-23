@@ -1,4 +1,5 @@
 import Foundation
+import HealthCollectorCore
 import HealthKit
 import SwiftUI
 
@@ -42,18 +43,18 @@ final class CollectorRuntime: ObservableObject {
 
         var outbox: OutboxStore?
         var anchors: AnchorStore?
-        var error: String?
+        var storageError: String?
         do {
             let support = try FileManager.default.url(
                 for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             outbox = try OutboxStore(directory: support.appendingPathComponent("outbox", isDirectory: true))
             anchors = try AnchorStore(directory: support.appendingPathComponent("anchors", isDirectory: true))
-        } catch {
-            error = "storage unavailable: \(error.localizedDescription)"
+        } catch let failure {
+            storageError = "storage unavailable: \(failure.localizedDescription)"
         }
         self.outbox = outbox
         self.anchors = anchors
-        self.storeError = error
+        self.storeError = storageError
     }
 
     func start() {
