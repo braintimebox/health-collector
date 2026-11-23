@@ -69,6 +69,11 @@ public struct SyncEngine {
             deletes: claimed.compactMap { $0.payload.deletion }
         )
 
+        // A local defect (a record built for another user) is caught before a byte
+        // leaves the phone: the server would answer 401 for the whole batch, and that
+        // reads as a credential problem.
+        try MeasurementClient.validate(batch)
+
         do {
             // A file-backed transport uploads from disk, so the batch is written
             // first and the file is removed once the answer is applied: an upload
@@ -107,6 +112,7 @@ public struct SyncEngine {
             records: claimed.compactMap { $0.payload.record },
             deletes: claimed.compactMap { $0.payload.deletion }
         )
+        try MeasurementClient.validate(batch)
         return try spool.write(batch)
     }
 

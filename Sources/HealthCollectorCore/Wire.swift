@@ -161,17 +161,29 @@ public struct OutboxPayload: Codable, Equatable {
 /// first, or an out-of-order retry drops it.
 public struct WireBatch: Codable, Equatable {
     public let userID: String
+    /// Journal key, not an identity: the server deduplicates on
+    /// `(user_id, record_id)`, so a resend after a lost answer carries a new
+    /// `batch_id` and still creates no duplicate. Its only job is to be found in
+    /// the server's `batches` table afterwards.
+    public let batchID: String
     public let records: [HealthRecord]
     public let deletes: [DeletedRecord]
 
-    public init(userID: String, records: [HealthRecord], deletes: [DeletedRecord]) {
+    public init(
+        userID: String,
+        batchID: String = UUID().uuidString,
+        records: [HealthRecord],
+        deletes: [DeletedRecord]
+    ) {
         self.userID = userID
+        self.batchID = batchID
         self.records = records
         self.deletes = deletes
     }
 
     private enum CodingKeys: String, CodingKey {
         case userID = "user_id"
+        case batchID = "batch_id"
         case records
         case deletes
     }
@@ -219,6 +231,16 @@ public enum ISOTimestamp {
     public static func string(from date: Date, timeZoneIdentifier: String) -> String {
         let zone = TimeZone(identifier: timeZoneIdentifier) ?? TimeZone(secondsFromGMT: 0)!
         return string(from: date, timeZone: zone)
+    }
+
+    /// The wire format the spec fixes: an instant in UTC, `Z`. The local zone is not
+    /// lost — it travels in `time_zone` — but the timestamp itself is not ambiguous.
+    public static func utcString(from date: Date) -> String {
+        string(from: date, timeZone: TimeZone(secondsFromGMT: 0)!)
+    }
+
+    public static func isUTC(_ string: String) -> Bool {
+        string.hasSuffix("Z")
     }
 
     public static func date(from string: String) -> Date? {

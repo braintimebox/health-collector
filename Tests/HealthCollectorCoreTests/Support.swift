@@ -37,15 +37,17 @@ func makeRecord(
         type: type,
         value: value,
         unit: unit,
-        startDate: "2026-11-23T07:30:00.000+01:00",
-        endDate: "2026-11-23T07:30:00.000+01:00",
+        // The spec fixes the wire timestamps as ISO 8601 UTC; the local zone
+        // travels in `time_zone` and is never folded into the instant.
+        startDate: "2026-11-23T06:30:00.000Z",
+        endDate: "2026-11-23T06:30:00.000Z",
         timeZone: "Europe/Warsaw",
         sourceName: "Apple Watch",
         sourceID: "com.apple.health.watch"
     )
 }
 
-func makeDeletion(of record: HealthRecord, at instant: String = "2026-11-23T08:00:00.000+01:00") -> DeletedRecord {
+func makeDeletion(of record: HealthRecord, at instant: String = "2026-11-23T07:00:00.000Z") -> DeletedRecord {
     DeletedRecord(identity: record.identity, deletedAt: instant, sourceName: record.sourceName)
 }
 

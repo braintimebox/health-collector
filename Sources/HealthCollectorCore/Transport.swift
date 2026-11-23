@@ -106,6 +106,14 @@ public struct RetryPolicy: Equatable {
             if status == 408 || status == 429 || (500...599).contains(status) {
                 return .retryable
             }
+            // A credential is a thing that gets fixed. Dead-lettering on 401/403
+            // would turn a misconfigured token into permanently undelivered
+            // measurements, and the queue is where they wait until someone fixes
+            // it — the backoff cap keeps the cost bounded and the status panel
+            // keeps the error visible.
+            if status == 401 || status == 403 {
+                return .retryable
+            }
             // Retrying a malformed payload forever burns battery and hides the
             // defect behind an always-full queue.
             return .permanent
