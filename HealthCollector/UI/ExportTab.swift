@@ -31,6 +31,7 @@ struct ExportTab: View {
                 .padding(.horizontal)
                 .padding(.bottom)
         }
+        .background(Color(.systemGroupedBackground))
         .navigationTitle("Export")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -72,7 +73,7 @@ struct CardTile: View {
         }
         .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
         .padding(12)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
@@ -95,7 +96,7 @@ struct StatusStrip: View {
             }
         }
         .padding(14)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
