@@ -104,10 +104,20 @@ struct ManualExportView: View {
     @ObservedObject var runtime: CollectorRuntime
     @State private var range: Range = .today
     @State private var sending = false
+    @State private var result: String?
 
     enum Range: String, CaseIterable, Identifiable {
         case today = "Today", week = "7 days", month = "30 days", everything = "All history"
         var id: String { rawValue }
+
+        var period: CollectionPeriod {
+            switch self {
+            case .today: return .day
+            case .week: return .week
+            case .month: return .month
+            case .everything: return .all
+            }
+        }
     }
 
     var body: some View {
@@ -115,7 +125,7 @@ struct ManualExportView: View {
             Section("Period") {
                 Picker("Range", selection: $range) { ForEach(Range.allCases) { Text($0.rawValue).tag($0) } }
                     .pickerStyle(.inline)
-                Text("Collection reads HealthKit through the same anchored query as the automatic path — the period only decides how far back a first run looks.")
+                Text("The period sets the window this run reads. The automatic path keeps its own cursor, and a manual run never moves it — so looking at the last 24 hours cannot skip what the cursor had not reached yet.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Result") {
@@ -127,11 +137,23 @@ struct ManualExportView: View {
             }
             Section {
                 Button {
-                    runtime.syncNow(reason: "manual \(range.rawValue)")
+                    sending = true
+                    result = nil
+                    runtime.exportWindow(period: range.period) { message in
+                        result = message
+                        sending = false
+                    }
                 } label: {
-                    HStack { Spacer(); Text("Collect and send").bold(); Spacer() }
+                    HStack {
+                        Spacer()
+                        Text(sending ? "Collecting…" : "Collect and send").bold()
+                        Spacer()
+                    }
                 }
                 .disabled(sending)
+                if let result {
+                    Text(result).font(.caption.monospaced()).foregroundStyle(.secondary)
+                }
                 Text("Manual runs go through the same Outbox and the same acknowledgement rules. Nothing here bypasses the queue.").font(.caption).foregroundStyle(.secondary)
             }
         }

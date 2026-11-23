@@ -65,6 +65,14 @@ final class CollectorRuntime: ObservableObject {
     }
 
     func start() {
+        // A screenshot run must not be interrupted by the HealthKit permission sheet:
+        // the point of those captures is the app's own layout, and a sheet would be
+        // the only thing visible. Nothing else changes — no data is read, nothing is
+        // enqueued, and the panel says so instead of pretending.
+        if ProcessInfo.processInfo.arguments.contains("-uiScreenshots") {
+            snapshot.permissions = "not requested (screenshot run)"
+            return
+        }
         Task {
             do {
                 try await source.requestAuthorization()
@@ -116,6 +124,62 @@ final class CollectorRuntime: ObservableObject {
                 completion(result)
             }
         }.resume()
+    }
+
+    /// Manual window export.
+    ///
+    /// Reads `[from, to]` for every supported type, puts the rows into the same
+    /// outbox the automatic path uses, and drains it through the same `SyncEngine`.
+    /// The stored cursor is not touched, so a manual look never costs data; a row
+    /// already delivered is refused by the outbox's key and simply not counted.
+    func exportWindow(period: CollectionPeriod, completion: ((String) -> Void)? = nil) {
+        guard let outbox, let anchors else {
+            let message = storeError ?? "storage unavailable"
+            snapshot.lastError = message
+            completion?(message)
+            return
+        }
+        let window = CollectionWindow.make(period: period, now: Date())
+        let source = self.source
+        let types = HealthKitSource.supportedTypes
+        let transport = URLSessionTransport(baseURL: baseURL, token: token)
+        queue.async { [weak self] in
+            var collected = 0
+            var accepted = 0
+            var failure: String?
+            for type in types {
+                do {
+                    let records = try source.fetchWindow(for: type, from: window.from, to: window.to)
+                    for record in records {
+                        if try outbox.enqueue(.insert(record), now: Date()) {
+                            collected += 1
+                        }
+                    }
+                } catch {
+                    failure = failure ?? "\(type): \(error)"
+                }
+            }
+            do {
+                let engine = SyncEngine(userID: "owner", store: outbox, transport: transport)
+                accepted = try engine.drain(now: Date()).accepted
+            } catch {
+                failure = failure ?? "\(error)"
+            }
+            let status = CollectorStatus.make(store: outbox, anchors: anchors, types: types, now: Date())
+            Task { @MainActor in
+                guard let self else { return }
+                self.snapshot.queueDepth = status.queueDepth
+                self.snapshot.deadCount = status.deadLettered
+                self.snapshot.oldestPending = status.oldestPendingAge
+                self.snapshot.lastSuccessAt = status.lastSuccessAt
+                self.snapshot.collected = collected
+                self.snapshot.accepted = accepted
+                self.snapshot.lastRunAt = Date()
+                self.snapshot.detail = "manual \(period.rawValue)"
+                self.snapshot.lastError = failure
+                completion?(failure ?? "collected \(collected), accepted \(accepted)")
+            }
+        }
     }
 
     /// Диагностика без секретов и без значений измерений.

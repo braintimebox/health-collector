@@ -168,6 +168,46 @@ final class HealthKitSource: HealthSource {
         )
     }
 
+    /// A window read for a manual export.
+    ///
+    /// It deliberately does not touch the stored anchor. A start-date predicate on
+    /// the incremental query would move the cursor to the window's edge, and
+    /// everything the cursor had not reached yet would be skipped — that is data
+    /// loss wearing the word "filter". Deletions are not collected here either:
+    /// they arrive on the anchored path, which is the only channel Apple keeps
+    /// durable.
+    func fetchWindow(for type: String, from: Date?, to: Date) throws -> [HealthRecord] {
+        guard let mapping = Self.mapping(for: type) else {
+            throw SourceError.queryFailed("unknown type \(type)")
+        }
+        let semaphore = DispatchSemaphore(value: 0)
+        var fetched: [HealthRecord] = []
+        var failure: Error?
+
+        let query = HKSampleQuery(
+            sampleType: mapping.sampleType,
+            // `options: []` even with an explicit start: `strictStartDate` on a nil
+            // start is not a filter, it is a query that returns nothing.
+            predicate: HKQuery.predicateForSamples(withStart: from, end: to, options: []),
+            limit: HKObjectQueryNoLimit,
+            sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+        ) { _, samples, error in
+            if let error { failure = error }
+            for sample in samples ?? [] {
+                if let record = Self.record(from: sample, mapping: mapping, userID: self.userID) {
+                    fetched.append(record)
+                }
+            }
+            semaphore.signal()
+        }
+        store.execute(query)
+        if semaphore.wait(timeout: .now() + 30) == .timedOut {
+            throw SourceError.timeout(type)
+        }
+        if let failure { throw SourceError.queryFailed(failure.localizedDescription) }
+        return fetched
+    }
+
     // MARK: Mapping
 
     private static func record(from sample: HKSample, mapping: TypeMapping, userID: String) -> HealthRecord? {

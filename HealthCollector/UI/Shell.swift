@@ -23,6 +23,16 @@ struct AppShell: View {
                 .tag(Tab.settings)
         }
         .task { runtime.start() }
+        // Three tabs are also three addresses: `healthcollector://browse` is what a
+        // screenshot job, and later a Shortcut, uses to land on a screen without
+        // driving the UI.
+        .onOpenURL { url in
+            switch url.host {
+            case "browse": selection = .browse
+            case "settings": selection = .settings
+            default: selection = .export
+            }
+        }
     }
 }
 
