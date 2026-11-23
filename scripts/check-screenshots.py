@@ -108,19 +108,53 @@ def band_rows(height: int) -> tuple[int, int]:
     return int(height * (1 - BAND_TOP)), int(height * (1 - BAND_BOTTOM))
 
 
-def accent_thirds(rows: list[list[tuple[int, int, int]]], width: int, height: int) -> list[int]:
-    """Count accent pixels per horizontal third of the tab bar's glyph row."""
+# The tab bar is a compact centred cluster, not a uniform W/6, W/2, 5W/6 grid: on a
+# 1206-px capture the item centres sit at 346 / 603 / 861, i.e. 0.287 / 0.500 / 0.714
+# of the width, with a step of 257 px between neighbours. A third-based rule worked
+# only because those centres happen to fall inside their thirds, with 56 px to spare —
+# the narrowest margin in the whole scheme, and the first thing a different screen
+# width or a wider panel would break. Positions are therefore taken from the measured
+# layout, and the tolerance is half a step, which is the largest value that still
+# cannot confuse two neighbouring tabs.
+EXPECTED_CENTRE = {"export": 0.2869, "browse": 0.5, "settings": 0.7140}
+CENTRE_TOLERANCE = 0.107
+# Measured cluster widths are 93..121 px of 1206 (0.077..0.100); the ceiling leaves
+# room for a wider label without accepting a block that spans the bar.
+MAX_CLUSTER_WIDTH = 0.12
+GAP_MERGE_PX = 12
+
+def accent_columns(rows: list[list[tuple[int, int, int]]], width: int, height: int) -> list[int]:
+    """How many accent pixels each column has inside the glyph row."""
     top, bottom = band_rows(height)
-    thirds = [0, 0, 0]
+    columns = [0] * width
     for y in range(top, bottom):
         for x, (r, g, b) in enumerate(rows[y]):
             if is_accent(r, g, b):
-                thirds[min(2, x * 3 // width)] += 1
-    return thirds
+                columns[x] += 1
+    return columns
 
 
-def accent_anywhere(rows: list[list[tuple[int, int, int]]], width: int, height: int) -> int:
-    """Accent pixels in the whole frame — used to tell "wrong screen" from "wrong band"."""
+def accent_clusters(columns: list[int], gap: int = GAP_MERGE_PX) -> list[tuple[int, int]]:
+    """Contiguous runs of columns carrying accent, merged across glyph gaps."""
+    runs: list[tuple[int, int]] = []
+    start: int | None = None
+    last = -gap
+    for x, count in enumerate(columns):
+        if count == 0:
+            continue
+        if start is None:
+            start = x
+        elif x - last > gap:
+            runs.append((start, last))
+            start = x
+        last = x
+    if start is not None:
+        runs.append((start, last))
+    return runs
+
+
+def accent_outside_band(rows: list[list[tuple[int, int, int]]], height: int) -> int:
+    """Accent pixels outside the glyph row — a signal, not a verdict."""
     top, _ = band_rows(height)
     total = 0
     for y in range(0, top):
@@ -130,17 +164,20 @@ def accent_anywhere(rows: list[list[tuple[int, int, int]]], width: int, height: 
     return total
 
 
-# The tab bar stays visible under a pushed screen, so a nested capture is checked
-# against the tab that owns it: Server lives under Export, Advanced under Settings.
-EXPECTED = {
-    "export": 0, "browse": 1, "settings": 2,
-    "server": 0, "advanced": 2,
+EXPECTED_TAB = {
+    "export": "export",
+    "browse": "browse",
+    "settings": "settings",
+    # A pushed screen keeps the tab bar visible, so a nested capture is checked against
+    # the tab that owns it.
+    "server": "export",
+    "advanced": "settings",
 }
 
 
-def expected_third(stem: str) -> int | None:
-    """`dark-export.png` is the same screen, captured in the other appearance."""
-    return EXPECTED.get(stem.removeprefix("dark-"))
+def expected_tab(stem: str) -> str | None:
+    """`dark-export.png` is the same screen captured in the other appearance."""
+    return EXPECTED_TAB.get(stem.removeprefix("dark-"))
 
 
 def main(argv: list[str]) -> int:
@@ -154,9 +191,9 @@ def main(argv: list[str]) -> int:
         return 2
 
     failures = 0
-    seen: dict[str, list[int]] = {}
+    seen: dict[str, str] = {}
     for path in files:
-        expected = expected_third(path.stem)
+        expected = expected_tab(path.stem)
         if expected is None:
             print(f"WARN: {path.name} не из известных вкладок — проверять нечего")
             continue
@@ -165,17 +202,13 @@ def main(argv: list[str]) -> int:
         except Exception as exc:  # noqa: BLE001 - unreadable is not clean
             print(f"UNKNOWN: {path.name}: {exc}", file=sys.stderr)
             return 2
-        thirds = accent_thirds(rows, width, height)
-        seen[path.stem] = thirds
-        total = sum(thirds)
-        if total == 0:
-            # Three states, not two: a band with nothing in it means the checker is
-            # looking in the wrong place (or the capture is not this app at all), and
-            # reporting that as a pass is how a guard starts lying.
-            outside = accent_anywhere(rows, width, height)
+
+        runs = accent_clusters(accent_columns(rows, width, height))
+        if not runs:
+            outside = accent_outside_band(rows, height)
             if outside:
                 print(
-                    f"UNKNOWN: {path.name}: в полосе глифов акцента нет, а вне её {outside} px — "
+                    f"UNKNOWN: {path.name}: в строке глифов акцента нет, а вне её {outside} px — "
                     "полоса не совпадает с вёрсткой панели",
                     file=sys.stderr,
                 )
@@ -183,21 +216,37 @@ def main(argv: list[str]) -> int:
             print(f"FAIL: {path.name}: панели вкладок не найдено — снят другой экран?", file=sys.stderr)
             failures += 1
             continue
-        winner = thirds.index(max(thirds))
-        share = (max(thirds) / total) if total else 0.0
-        ok = winner == expected and share >= 0.5
-        verdict = "ok  " if ok else "FAIL"
-        names = ["export", "browse", "settings"]
+
+        if len(runs) > 1:
+            print(f"FAIL: {path.name}: в строке глифов {len(runs)} акцентных кластеров {runs}")
+            failures += 1
+            continue
+
+        left, right = runs[0]
+        span = right - left + 1
+        if span / width > MAX_CLUSTER_WIDTH:
+            print(
+                f"FAIL: {path.name}: кластер шириной {span} px ({span / width:.0%} ширины) — "
+                "это не пункт панели"
+            )
+            failures += 1
+            continue
+
+        centre = (left + right) / 2 / width
+        nearest = min(EXPECTED_CENTRE, key=lambda tab: abs(EXPECTED_CENTRE[tab] - centre))
+        delta = abs(EXPECTED_CENTRE[nearest] - centre)
+        seen[path.stem] = nearest
+        outside = accent_outside_band(rows, height)
+        ok = nearest == expected and delta <= CENTRE_TOLERANCE
         print(
-            f"{verdict} {path.stem:14s} акцент по третям: {thirds} — ожидалась треть "
-            f"{expected} ({names[expected]}), доля {share:.0%}"
+            f"{'ok  ' if ok else 'FAIL'} {path.stem:14s} кластер x={left}..{right} "
+            f"({span} px), центр {centre:.3f} → ближайшая {nearest} (Δ{delta:.3f})"
+            + (f", акцент вне полосы {outside} px" if outside else "")
         )
         if not ok:
             failures += 1
 
-    # The three captures must land on three different tabs, otherwise one of them is
-    # a duplicate that happened to pass its own check.
-    winners = [thirds.index(max(thirds)) for thirds in seen.values() if sum(thirds)]
+    winners = list(seen.values())
     if len(winners) == len(seen) and len(set(winners)) != len(seen):
         print(f"FAIL: разные файлы показывают одну и ту же вкладку: {winners}")
         failures += 1
