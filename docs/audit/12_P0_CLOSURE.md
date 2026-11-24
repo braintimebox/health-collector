@@ -292,3 +292,42 @@ checkable claim instead of a coincidence.
   Then: `POST /health-bridge` without a token must answer **401**, `GET /v1/health` must
   still answer **200**, and the gate with `HC_SERVER_TOKEN` must stay green.
 * **`/v1/measurements` must not be deployed before that restart**, per condition 6.
+
+---
+
+# The door is closed, and verified on the live port
+
+After the unit was restarted (`systemctl --user restart health-bridge.service` — it is a
+**user** unit, so no `sudo`), measured by hand on `127.0.0.1:8910`:
+
+| request | answer |
+|---|---|
+| `POST /health-bridge` without token | **401** |
+| `GET /v1/health` without token | **200** (liveness intentionally open) |
+| `GET /v1/measurements` without token | **401** |
+| gate **without** token | `UNCHECKED: route measurements … answers 401`, **rc=2** |
+| gate **with** the credential file's token | `health_probe 200`, `measurements 404 as declared`, **rc=0** |
+
+Condition 6 is therefore closed on the running service, not only in a commit: condition 6
+asked to close the door *before* deploying the measurement route, and the exit-2 / exit-0
+pair is the proof that "missing" and "protected" are now distinguishable from outside.
+
+## One more defect in the token chain (found by @team-gate, fixed)
+
+`HEALTH_BRIDGE_CREDENTIALS` was *inserted* at the head of the default chain instead of
+replacing it. A stand whose own credential file had a typo therefore loaded the
+production token silently: protected-looking, accepting a secret its operator did not
+hold, while its own token got 401. The override is now authoritative — no fallback, and
+the log names the source (length only, never the value).
+
+`scripts/test-auth-token.py`: **7 cases**, including the two that reproduce the bent chain
+with the real `HOME` on disk (override without a `token` key; override pointing at a
+missing file). Both must refuse and must not print `токен загружен`. Mutation control:
+restoring the insert-into-chain behaviour fails **3 of 7** (S4, S6, S7).
+
+## Consequence for the collector
+
+Every client must now present a token. The app sends `Authorization: Bearer` from the
+Keychain and, when no token is stored, fails locally with `no token configured` before
+touching the network — so a missing token shows up as a named local failure instead of a
+silent 401 on every batch.
