@@ -140,6 +140,12 @@ EXPECTED_TAB = {
     # Workouts and Sleep are pushed from Browse.
     "workouts": "browse",
     "sleep": "browse",
+    # Every Settings sub-screen keeps the tab bar; each is a push under Settings.
+    "settings-permissions": "settings",
+    "settings-export": "settings",
+    "settings-units": "settings",
+    "settings-notifications": "settings",
+    "settings-about": "settings",
 }
 
 DARK_LUMINANCE = 0.45
@@ -153,7 +159,7 @@ def expected_tab(stem: str) -> str | None:
 def group_of(stem: str) -> str:
     """Which pass a capture belongs to. Duplicate-tab checks apply inside a pass."""
     base = stem.removeprefix("dark-")
-    if base in ("server", "advanced", "workouts", "sleep"):
+    if base in ("server", "advanced", "workouts", "sleep") or base.startswith("settings-"):
         return "nested"
     return "dark" if stem.startswith("dark-") else "light"
 

@@ -22,7 +22,12 @@ struct SettingsTab: View {
             case "Advanced": AdvancedView(runtime: runtime)
             case "Health Permissions": PermissionsView(runtime: runtime)
             case "Export Settings": ExportSettingsView(runtime: runtime)
-            default: EmptyView()
+            case "Unit Preferences": UnitPreferencesView()
+            case "Notifications": NotificationsView()
+            case "About": AboutView()
+            // A deep link we do not know must not render a blank screen that looks
+            // like a broken transition.
+            default: Text("Unknown screen: \(title)")
             }
         }
         .onAppear {

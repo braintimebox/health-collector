@@ -235,6 +235,13 @@ jobs:
           capture light settings Advanced  advanced
           capture light browse   Workouts  workouts
           capture light browse   Sleep     sleep
+          # Every Settings sub-screen is captured too: a blank or crashing screen
+          # is invisible in a report that only visits the tab roots.
+          capture light settings "Health Permissions" settings-permissions
+          capture light settings "Export Settings"    settings-export
+          capture light settings "Unit Preferences"   settings-units
+          capture light settings "Notifications"      settings-notifications
+          capture light settings "About"              settings-about
           ls -l screens
 
       # What has to be proven is that each capture shows *its* screen, not merely that
