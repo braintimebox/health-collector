@@ -139,9 +139,14 @@ def case(
     return ok
 
 
-def triple(**kwargs) -> dict[str, list[bytearray]]:
-    """Three captures of consecutive tabs, all carrying the same extra decoration."""
-    return {name: frame(name, **kwargs) for name in ("export", "browse", "settings")}
+def triple(prefix: str = "", **kwargs) -> dict[str, list[bytearray]]:
+    """Three captures of consecutive tabs, all carrying the same extra decoration.
+
+    `prefix` matters: a dark pass must be *named* dark, otherwise the checker files it
+    under the light group, warns, and exits 0 — the dark branch never runs, and a guard
+    that fails every real dark capture stays green in the tests.
+    """
+    return {f"{prefix}{name}": frame(name, **kwargs) for name in ("export", "browse", "settings")}
 
 
 def main(argv: list[str]) -> int:
@@ -192,7 +197,16 @@ def main(argv: list[str]) -> int:
         ),
         case(checker, "акцент над полосой (просвечивание контента)", triple(accent_above_band=True), 0, "ИТОГ: OK"),
         # Dark pass, and a name that lies about the appearance it was captured in.
-        case(checker, "тёмный проход целиком", triple(dark=True), 0, "ИТОГ: OK"),
+        case(checker, "тёмный проход целиком", triple(prefix="dark-", dark=True), 0, "OK — 3 снимков"),
+        # Nested screens are the reason server/advanced exist in the acceptance list;
+        # a run that silently drops them from EXPECTED_TAB would report "OK — 0 снимков".
+        case(
+            checker,
+            "вложенные экраны в своих вкладках",
+            {"server": frame("export"), "advanced": frame("settings")},
+            0,
+            "OK — 2 снимков",
+        ),
         case(
             checker,
             "тёмное имя, светлый кадр",

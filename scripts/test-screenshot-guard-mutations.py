@@ -55,6 +55,16 @@ MUTATIONS: list[tuple[str, str, str]] = [
         '    if group == "dark" and not dark:',
         "    if False:",
     ),
+    (
+        "порог тёмной темы 0.45 → 0.0 (каждый тёмный кадр «светлый»)",
+        "DARK_LUMINANCE = 0.45",
+        "DARK_LUMINANCE = 0.0",
+    ),
+    (
+        "вложенные экраны выброшены из ожиданий",
+        '    "server": "export",\n    "advanced": "settings",\n',
+        "",
+    ),
 ]
 
 
