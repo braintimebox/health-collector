@@ -77,7 +77,9 @@ struct BrowseSample: Identifiable {
 }
 
 final class HealthKitBrowse {
-    private let store = HKHealthStore()
+    /// Not private: the workout/sleep extensions live in their own file, and
+    /// the alternative — a second HKHealthStore — would double every query.
+    let store = HKHealthStore()
 
     struct Metric {
         let wire: String
