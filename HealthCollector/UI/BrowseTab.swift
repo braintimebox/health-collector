@@ -39,10 +39,8 @@ struct BrowseTab: View {
             }
 
             Section {
-                NavigationLink("Workouts") { NotImplementedView(feature: "Workouts",
-                    reason: "The collector does not read HKWorkout yet; only duration in minutes is mapped today.") }
-                NavigationLink("Sleep") { NotImplementedView(feature: "Sleep",
-                    reason: "Sleep stages are collected as separate rows, but no sleep screen is built yet.") }
+                NavigationLink("Workouts") { WorkoutsView(browse: browse) }
+                NavigationLink("Sleep") { SleepView(browse: browse) }
                 NavigationLink("Activity") { NotImplementedView(feature: "Activity",
                     reason: "Steps and active energy are shown under Metrics. Rings need stand hours, which are not collected.") }
                 NavigationLink("Heart Health") { NotImplementedView(feature: "Heart Health",

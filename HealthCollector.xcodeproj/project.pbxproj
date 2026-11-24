@@ -16,6 +16,7 @@
 		C0DEC0DE00000000000000B5 /* ExportTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE00000000000000B4 /* ExportTab.swift */; };
 		C0DEC0DE00000000000000B7 /* BrowseTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE00000000000000B6 /* BrowseTab.swift */; };
 		C0DEC0DE00000000000000B9 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE00000000000000B8 /* SettingsTab.swift */; };
+		C0DEC0DE00000000000000C1 /* BrowseExtra.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEC0DE00000000000000C0 /* BrowseExtra.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		C0DEC0DE0000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000013 /* HealthCollector.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthCollector.entitlements; sourceTree = "<group>"; };
 		C0DEC0DE0000000000000014 /* HealthCollector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DEC0DE00000000000000C0 /* BrowseExtra.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI/BrowseExtra.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				C0DEC0DE00000000000000B4 /* ExportTab.swift */,
 				C0DEC0DE00000000000000B6 /* BrowseTab.swift */,
 				C0DEC0DE00000000000000B8 /* SettingsTab.swift */,
+				C0DEC0DE00000000000000C0 /* BrowseExtra.swift */,
 				C0DEC0DE0000000000000012 /* Info.plist */,
 				C0DEC0DE0000000000000013 /* HealthCollector.entitlements */,
 			);
@@ -159,6 +162,7 @@
 				C0DEC0DE00000000000000B5 /* ExportTab.swift in Sources */,
 				C0DEC0DE00000000000000B7 /* BrowseTab.swift in Sources */,
 				C0DEC0DE00000000000000B9 /* SettingsTab.swift in Sources */,
+				C0DEC0DE00000000000000C1 /* BrowseExtra.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,7 +179,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = HealthCollector/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.braintimebox.healthcollector;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -198,7 +202,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = HealthCollector/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.braintimebox.healthcollector;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
