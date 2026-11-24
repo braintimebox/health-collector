@@ -2,6 +2,8 @@ import SwiftUI
 
 struct BrowseTab: View {
     @ObservedObject var runtime: CollectorRuntime
+    var initialRoute: String?
+    @State private var pushed: String?
     private let browse = HealthKitBrowse()
     @State private var latest: [BrowseSample] = []
     @State private var loading = false
@@ -52,6 +54,16 @@ struct BrowseTab: View {
                 Text("Categories listed as not implemented are marked honestly: the app never asked for those types, so there is nothing to show.")
                     .font(.caption).foregroundStyle(.secondary)
             }
+        }
+        .navigationDestination(item: $pushed) { route in
+            switch route {
+            case "Workouts": WorkoutsView(browse: browse)
+            case "Sleep": SleepView(browse: browse)
+            default: EmptyView()
+            }
+        }
+        .onAppear {
+            if pushed == nil, let initialRoute { pushed = initialRoute }
         }
         .navigationTitle("Browse")
         .refreshable { await load() }

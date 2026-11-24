@@ -41,7 +41,7 @@ struct AppShell: View {
                 .tabItem { Label("Export", systemImage: "hand.tap") }
                 .tag(Tab.export)
 
-            NavigationStack { BrowseTab(runtime: runtime) }
+            NavigationStack { BrowseTab(runtime: runtime, initialRoute: selection == .browse ? route : nil) }
                 .tabItem { Label("Browse", systemImage: "square.grid.2x2") }
                 .tag(Tab.browse)
 

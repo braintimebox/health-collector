@@ -137,6 +137,9 @@ EXPECTED_TAB = {
     # the tab that owns it.
     "server": "export",
     "advanced": "settings",
+    # Workouts and Sleep are pushed from Browse.
+    "workouts": "browse",
+    "sleep": "browse",
 }
 
 DARK_LUMINANCE = 0.45
@@ -150,7 +153,7 @@ def expected_tab(stem: str) -> str | None:
 def group_of(stem: str) -> str:
     """Which pass a capture belongs to. Duplicate-tab checks apply inside a pass."""
     base = stem.removeprefix("dark-")
-    if base in ("server", "advanced"):
+    if base in ("server", "advanced", "workouts", "sleep"):
         return "nested"
     return "dark" if stem.startswith("dark-") else "light"
 

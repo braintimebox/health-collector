@@ -233,6 +233,8 @@ jobs:
           capture dark  settings ""        dark-settings
           capture light export   Server    server
           capture light settings Advanced  advanced
+          capture light browse   Workouts  workouts
+          capture light browse   Sleep     sleep
           ls -l screens
 
       # What has to be proven is that each capture shows *its* screen, not merely that
