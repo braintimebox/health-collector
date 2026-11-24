@@ -1,51 +1,49 @@
 # 01 — Crash investigation: Settings
 
-Статус: **ОТКРЫТО**. Причина не установлена; ниже — что проверено, что исключено и что нужно
-для доказательства.
+Статус: **ОТКРЫТО**. Причина не установлена; доказательство отсутствует.
 
-## Что известно (FACT)
+## Факты (CONFIRMED)
 
-- Владелец сообщает: приложение вылетает при открытии App Settings.
-- Версия на устройстве: 1.0.0 (unsiged IPA подписан владельцем — сборочный артефакт подписи не несёт).
-- В симуляторе (`macos-26`, iOS 26.5, iPhone 16 Pro) вкладка Settings открывается: до этого релиза
-  снимок `settings.png` снимался успешно в каждом прогоне (8 кадров, включая тёмный проход).
-- Подэкраны Settings снимались только два: `Advanced` (`advanced.png`). Остальные пять —
-  Health Permissions, Export Settings, Unit Preferences, Notifications, About — **ни разу не
-  открывались** ни в CI, ни на устройстве (CODE: `.github/workflows/health-collector-ipa.yml`).
+- Владелец сообщает падение при открытии App Settings; версия 1.0.0, подписана владельцем.
+- В симуляторе (`macos-26`, iOS 26.5) вкладка Settings открывается: снимок `settings.png` снимался
+  в каждом прогоне, включая тёмный проход.
+- Из шести подэкранов Settings в CI открывался **только Advanced**; остальные пять не открывались
+  ни разу (`grep 'capture light settings' .github/workflows/health-collector-ipa.yml` до `852e6e1`).
+- `SettingsTab` до `852e6e1` имел `default: EmptyView()` в `navigationDestination` — три пункта из
+  шести давали пустой экран.
 
-## Что исключено
+## Исключено
 
-- Синтаксис всех файлов Settings: `swiftc -parse` — 0 ошибок.
-- Обрыв навигации в `SettingsTab`: `navigationDestination` имеет ветку для каждого пункта
-  (добавлены `Unit Preferences`, `Notifications`, `About`; ранее три пункта давали пустой экран —
-  это дефект, но он не роняет процесс).
-- Keychain: чтение через `SecItemCopyMatching` возвращает `nil` при любой ошибке, исключения не
-  бросает; `AppSettings.token` вызывается только из `ExportSettingsView`/`ServerView`, не из корня
-  Settings.
+- Синтаксис слоя Settings: `swiftc -parse` по 8 файлам приложения — 0 ошибок.
+- Обрыв навигации: сейчас у каждого из шести пунктов есть назначение, неизвестный маршрут печатает
+  текст, а не пустоту.
+- Keychain как причина падения в корне Settings: `SecItemCopyMatching` возвращает `nil`, не бросает;
+  токен читается только на Server и Export Settings (`AppSettings.swift:33`).
 
-## Гипотезы, по убыванию правдоподобия
+## Гипотезы (POTENTIAL, по убыванию)
 
-1. **Краш на конкретном подэкране, а не на корне Settings.** Все пять непроверенных подэкранов
-   содержат либо `Button` с `UIApplication.shared.open("x-apple-health://")`, либо `UIPasteboard`,
-   либо ссылку на `runtime.diagnosticsText()`. Любой из них вызывается только по нажатию, поэтому
-   краш при «открытии App Settings» скорее означает переход в подраздел.
-2. **Подпись/entitlements.** Бандл подписан сторонним сертификатом; если профиль не даёт
-   `com.apple.developer.healthkit`, отказ приходит при первом обращении к HealthKit. В корне Settings
-   обращений нет, но `PermissionsView` вызывает `runtime.requestPermissions()` — это HealthKit.
-   Если владелец открыл именно Permissions, отказ без entitlement может привести к падению.
-3. **Повторное открытие экрана.** `PermissionsView` держит `@ObservedObject var runtime` и кнопку,
-   которая мутирует `runtime.snapshot` из `Task` — при повторном входе возможен конфликт обновлений.
-   Не доказано.
+1. Падает конкретный подэкран, а не корень. В `PermissionsView` кнопка вызывает
+   `runtime.requestPermissions()` — единственный вызов HealthKit в стеке Settings. При профиле без
+   `com.apple.developer.healthkit` это отказ, а не падение, но комбинация «отказ + повторный запрос»
+   не проверялась ни разу.
+2. Повторное открытие экрана: `PermissionsView`/`AdvancedView` держат `@ObservedObject var runtime` и
+   мутируют `runtime.snapshot` из `Task`; при повторном входе возможен конфликт обновлений.
+3. Подпись/entitlements как корень: без `…healthkit.background-delivery` `enableBackgroundDelivery`
+   возвращает отказ, который сейчас игнорируется (`HealthKitSource.swift:115-118`).
 
-## Что нужно для доказательства
+## Что нужно
 
-Крэш-лог с устройства: **Settings → Privacy & Security → Analytics & Improvements → Analytics Data →
-`HealthCollector-2026-… .ips`**. В нём будет строка `Exception Type` и символ вида
-`HealthCollector.<функция>`. Без него любая из трёх гипотез остаётся гипотезой.
+Крэш-лог: Settings → Privacy & Security → Analytics & Improvements → Analytics Data →
+`HealthCollector-2026-… .ips`. Плюс уточнение: падает вкладка Settings **внутри приложения** или
+страница приложения **в системных Настройках iOS** — это разные места.
 
-## Что сделано в этом раунде
+## Что уже сделано
 
-- `navigationDestination` дополнен тремя отсутствовавшими экранами, неизвестный маршрут больше не
-  рендерит пустоту.
-- CI теперь открывает и снимает **все шесть** подэкранов Settings, поэтому «пустой/упавший экран»
-  станет виден в прогоне, а не в отчёте.
+- `852e6e1`: все шесть подэкранов достижимы, неизвестный маршрут не рендерит пустоту.
+- CI теперь открывает и снимает все шесть подэкранов Settings — «пустой/упавший экран» станет виден
+  в прогоне.
+
+## Регрессионный тест
+
+UI-тест на открытие Settings и все шесть переходов **не написан**: в пакете нет UI-тестов, только
+модульные на `HealthCollectorCore`. Это зафиксировано в `09_TESTING_GAPS.md` как P0.
