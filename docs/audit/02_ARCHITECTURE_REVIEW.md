@@ -36,6 +36,21 @@
 | HealthKitSource | чтение HealthKit | HealthKit | курсовики в AnchorStore | косвенно (фейк) |
 | Collector/Outbox/SyncEngine | durability и доставка | — | файлы на диске | 61 тест |
 
+## Runtime lifecycle (фактический)
+
+```
+Shell.task ──▶ runtime.start()                    каждый запуск, включая после reboot
+                 ├─ HealthKitSource.startObservers { syncNow("observer") }   HKObserverQuery
+                 └─ snapshot ← CollectorStatus.make(...)
+scenePhase: background / foreground ──▶ Shell: runtime.refresh()
+кнопки Manual / Server / Advanced ──▶ syncNow("manual")
+queue.async { collectOnce → drain }  ──▶ Task{@MainActor} snapshot
+```
+
+Чего нет: `BGTaskScheduler`, планировщика по времени, дедупликации одновременных запусков. Два
+нажатия подряд ставят в serial-очередь два полных прохода (не параллельно, но дважды). Запуск
+синхронизации **не зависит** от `automationEnabled` — это и есть дефект «фиктивного тумблера».
+
 ## Точки отказа (CONFIRMED)
 
 1. `Runtime.swift:43` — неверный URL молча заменяется production-адресом.

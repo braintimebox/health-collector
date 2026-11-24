@@ -20,16 +20,29 @@
 - Keychain как причина падения в корне Settings: `SecItemCopyMatching` возвращает `nil`, не бросает;
   токен читается только на Server и Export Settings (`AppSettings.swift:33`).
 
-## Гипотезы (POTENTIAL, по убыванию)
+## Что ещё исключено (проверено в этом раунде)
 
-1. Падает конкретный подэкран, а не корень. В `PermissionsView` кнопка вызывает
-   `runtime.requestPermissions()` — единственный вызов HealthKit в стеке Settings. При профиле без
-   `com.apple.developer.healthkit` это отказ, а не падение, но комбинация «отказ + повторный запрос»
-   не проверялась ни разу.
-2. Повторное открытие экрана: `PermissionsView`/`AdvancedView` держат `@ObservedObject var runtime` и
-   мутируют `runtime.snapshot` из `Task`; при повторном входе возможен конфликт обновлений.
-3. Подпись/entitlements как корень: без `…healthkit.background-delivery` `enableBackgroundDelivery`
-   возвращает отказ, который сейчас игнорируется (`HealthKitSource.swift:115-118`).
+- **Ни одного trap-конструкта в слое приложения.** `grep -rn 'fatalError|try!|as!|precondition|
+  uniqueKeysWithValues|\.first!|\.last!|\[0\]' HealthCollector/ Sources/` — **пусто**. Ни одного
+  force-unwrap в `UI/*.swift`. Значит падение не может быть вызвано нашим кодом на уровне Swift-ловушки.
+- **Ни один экран Settings не трогает HealthKit.** `grep 'HKHealthStore|requestAuthorization|
+  enableBackgroundDelivery' HealthCollector/UI/` — пусто. Единственный путь: кнопка →
+  `runtime.requestPermissions()` (`Runtime.swift:93-103`), а он завернут в `Task { do/catch }` и
+  ошибку кладёт в снапшот — упасть там нечему.
+- **Watchdog (0x8badf00d) как версия снят.** Блокирующие семафоры живут в
+  `queue.async` (`Runtime.swift:211`), а это `qos: .utility` очередь, не главный поток: она стоит,
+  главный поток свободен.
+- `onAppear` есть только у корня Settings (`SettingsTab.swift:33`) и читает `initialRoute`; никаких
+  побочных эффектов и обращений к хранилищам там нет.
+
+## Остающиеся гипотезы (POTENTIAL, без лога не различаются)
+
+1. **Отказ на уровне entitlement/подписи** при первом обращении к HealthKit. Наш код такой отказ
+   перехватывает, но если профиль не содержит `com.apple.developer.healthkit`, iOS может завершить
+   процесс раньше, чем вернуть ошибку.
+2. **Системный/SwiftUI-сбой на конкретном подэкране на конкретной версии iOS** — воспроизводится
+   только на устройстве.
+3. **Нехватка памяти/иное** — маловероятно: экраны статичные, данных не грузят.
 
 ## Что нужно
 

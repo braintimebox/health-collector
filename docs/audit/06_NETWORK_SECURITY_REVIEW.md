@@ -4,7 +4,7 @@
 
 | Пункт | Факт | Оценка |
 |---|---|---|
-| Транспорт | `URLSession.shared.dataTask` + `DispatchSemaphore(45 c)` (`Runtime.swift:257-280`) | блокирует вызывающий поток; отмены нет |
+| Транспорт | `URLSession.shared.dataTask` + `DispatchSemaphore(45 c)` (`Runtime.swift:257-280`) | блокирует очередь Runtime (`qos: .utility`), не главный поток; отмены нет |
 | Таймаут | 45 с на батч; в ретрай-политике — свой | приемлемо, но грубо |
 | HTTP-коды | `MeasurementClient.decode` классифицирует 2xx/4xx/5xx | корректно, покрыто тестами |
 | Malformed ACK | 200 без `accepted` → unconfirmed | корректно |
