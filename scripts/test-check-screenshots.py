@@ -232,6 +232,15 @@ def main(argv: list[str]) -> int:
             0,
             "OK — 2 снимков",
         ),
+        # A nested screen is a push, not a tab: two of them may share one tab, and the
+        # duplicate rule must not fire on that. Workouts and Sleep both live under Browse.
+        case(
+            checker,
+            "два вложенных экрана на одной вкладке — не дубликат",
+            {"workouts": frame("browse"), "sleep": frame("browse")},
+            0,
+            "OK — 2 снимков",
+        ),
         case(
             checker,
             "тёмное имя, светлый кадр",

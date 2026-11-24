@@ -315,6 +315,12 @@ def main(argv: list[str]) -> int:
             seen.setdefault(group_of(path.stem), []).append(tab)
 
     for group, tabs in sorted(seen.items()):
+        # Only the tab-root captures make the claim "three files, three tabs". A nested
+        # screen is a push on top of some tab, and two of them legitimately share one:
+        # Workouts and Sleep are both under Browse. Applying the rule here produced a
+        # false failure on the first run that had more than one nested screen per tab.
+        if group == "nested":
+            continue
         if len(tabs) > 1 and len(set(tabs)) != len(tabs):
             print(f"FAIL: проход {group}: разные файлы показывают одну и ту же вкладку: {tabs}")
             failures += 1
