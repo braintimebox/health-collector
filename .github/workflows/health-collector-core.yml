@@ -29,6 +29,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  routes:
+    # The client and the receiver each used to keep a private route list; the probe
+    # called /v1/health while the server answered /health, and nothing failed. This
+    # job compares the client table against contract/routes.json on every push.
+    # The live half needs a running receiver, so it runs where one exists — CI here
+    # checks the half that can be checked without a server, and says so.
+    name: route contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Contract matches the client
+        run: python3 scripts/check-route-drift.py
+
+      - name: The gate notices drift (self-test)
+        run: python3 scripts/test-route-drift.py
+
   test:
     name: swift test
     runs-on: macos-26

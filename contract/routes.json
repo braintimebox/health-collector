@@ -1,0 +1,24 @@
+{
+  "_comment": "Shared route table. The client enum ApiRoute and the receiver must both match this file; scripts/check-route-drift.py fails by route id when they do not.",
+  "routes": [
+    {
+      "id": "health_probe",
+      "method": "GET",
+      "path": "/v1/health",
+      "client": "ApiRoute.healthProbe",
+      "deployed": true,
+      "live_expect": "not_404",
+      "used_by": "ServerView 'Test connection', runtime probe"
+    },
+    {
+      "id": "measurements",
+      "method": "POST",
+      "path": "/v1/measurements",
+      "client": "ApiRoute.measurements",
+      "deployed": false,
+      "live_expect": "404",
+      "used_by": "SyncEngine batch ingest",
+      "known_gap": "Declared by the client, not served by the receiver: an ACK today means the test stand accepted the batch, not that the agent can read the data."
+    }
+  ]
+}

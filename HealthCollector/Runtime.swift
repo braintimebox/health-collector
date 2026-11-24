@@ -122,7 +122,7 @@ final class CollectorRuntime: ObservableObject {
             completion(text)
             return
         }
-        var request = URLRequest(url: server.url.appendingPathComponent("v1/health"))
+        var request = URLRequest(url: server.url.appendingPathComponent(ApiRoute.relative(ApiRoute.healthProbe)))
         request.timeoutInterval = 10
         if !token.isEmpty {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

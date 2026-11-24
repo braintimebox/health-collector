@@ -38,7 +38,7 @@ public enum ClientError: Error, Equatable {
 }
 
 public enum MeasurementClient {
-    public static let path = "/v1/measurements"
+    public static let path = ApiRoute.measurements
     public static let tokenHeader = "Authorization"
 
     // MARK: Request
@@ -66,7 +66,7 @@ public enum MeasurementClient {
     }
 
     public static func makeRequest(batch: WireBatch, baseURL: URL, token: String) throws -> URLRequest {
-        let url = baseURL.appendingPathComponent("v1/measurements")
+        let url = baseURL.appendingPathComponent(ApiRoute.relative(ApiRoute.measurements))
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: tokenHeader)
