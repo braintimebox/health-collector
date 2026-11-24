@@ -1,4 +1,5 @@
 import Foundation
+import HealthCollectorCore
 import HealthKit
 import SwiftUI
 
