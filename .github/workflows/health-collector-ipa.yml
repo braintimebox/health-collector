@@ -48,6 +48,11 @@ jobs:
       - name: Prove the screenshot guard still fails on a wrong capture
         run: python3 scripts/test-check-screenshots.py
 
+      # D38: the guard is accepted not when its self-test is green, but when a weakened
+      # guard turns it red. Each mutation below loosens one setting and must be caught.
+      - name: Prove a weakened guard fails the self-test
+        run: python3 scripts/test-screenshot-guard-mutations.py
+
   ipa:
     name: unsigned ipa
     needs: contract
