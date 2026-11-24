@@ -105,3 +105,71 @@ store an address the transport will refuse while the field shows something else.
 and the sentence now reads "The old path was , which made a refused write
 indistinguishable from a saved one." The code defect it describes is real and fixed;
 only the message text is blemished. History was not rewritten for cosmetics.
+
+---
+
+# Route drift — the probe called a path the receiver did not serve
+
+Found by admin while checking "which address should the owner type now": the app
+probed `/v1/health`, the receiver answered `/health`. After the endpoint fix the app
+stopped lying about the address and started lying about the server.
+
+## What changed
+
+| side | change |
+|---|---|
+| client | `Sources/HealthCollectorCore/ApiRoute.swift` — `healthProbe`, `measurements`; `MeasurementClient.path` and the runtime probe read it, and the inline `"v1/measurements"` copy inside `makeRequest` is gone |
+| contract | `contract/routes.json` — path, method, `deployed`, `live_expect`, known gap in words |
+| receiver | `server.py` — `@app.get("/v1/health")` on the same handler as `/health` (commit `3be98aa` in the receiver repo). `/health` keeps answering |
+| gate | `scripts/check-route-drift.py`, `scripts/test-route-drift.py`, CI job `route contract` |
+
+## The gate has three states, and none of them is a silent pass
+
+* `0` — client table, contract and (with `--server`) live answers agree.
+* `1` — drift, **named by route id**: a route missing on either side, a path that
+  differs, a `/v1` literal outside `ApiRoute`, or a deployed route answering 404.
+* `2` — `UNKNOWN` with `--require-live`: the server was unreachable, so nothing about
+  the live half was checked. A gate that cannot see the server must not report clean.
+
+The static half also flags a literal that *matches* the table: the original defect was
+an inline `"v1/health"` that happened to equal nothing on the other side, and a matching
+value proves nothing while two copies exist.
+
+## Evidence, run by hand
+
+| command | result |
+|---|---|
+| fresh receiver from the patched source, port 8931: `/health`, `/v1/health`, `/v1/measurements` | `200`, `200`, `404` |
+| `check-route-drift.py` (static, real tree) | `ok static: 2 маршрут(ов)`, `LIVE: не проверялось`, exit 0 |
+| `check-route-drift.py --server http://127.0.0.1:8931` | health_probe `200 as expected`, measurements `404 as declared (known gap)`, exit 0 |
+| `check-route-drift.py --server http://127.0.0.1:8910` (**the live, unpatched receiver**) | `FAIL: route health_probe … answers 404`, exit 1 |
+| `check-route-drift.py --server http://127.0.0.1:8999 --require-live` | `UNKNOWN … недоступен`, exit 2 |
+| `test-route-drift.py` | **8 cases, all behave as declared** |
+| `swift test` | 68 passed, 0 failed |
+| CI `Health Collector Core` on `ae5b155` | `swift test` success, `route contract` success (log shows the static line and all 8 cases) |
+| CI `Health Collector IPA` on `ae5b155` | see below — the app target must still compile with `ApiRoute` |
+
+The `8910` run is the important one: against the receiver that is actually running, the
+gate fails by route name. That is the defect, caught by the test written for it.
+
+## Not done, on purpose
+
+* **The live receiver was not restarted.** `health-bridge.service` is a system unit and
+  this session cannot manage it (`systemctl show … FragmentPath` returns nothing, no
+  `sudo`). The patch is committed and verified on a fresh instance; the running
+  process still serves the old code until someone restarts it:
+
+  ```
+  sudo systemctl restart health-bridge.service
+  ```
+
+  After the restart the same command proves the fix on the live port:
+  `python3 scripts/check-route-drift.py --server http://127.0.0.1:8910 --require-live`
+  — it must print `ИТОГ: клиент, контракт и сервер согласованы`, exit 0.
+* **The live half does not run in CI.** It needs a running receiver, and the repository
+  has none; the CI job checks the half that exists off-device and prints
+  `LIVE: не проверялось` rather than implying more.
+* **`/v1/measurements` is still not served** (`404 as declared`). Until it is, an ACK
+  means the test stand accepted a batch, not that the agent can read the data. The
+  contract records this as a known gap, and case `S7` fails the day it starts
+  answering — that is the signal to flip `deployed` and stop calling it a gap.
