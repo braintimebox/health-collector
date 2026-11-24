@@ -31,7 +31,10 @@ DEFAULT_CHECKER = HERE / "check-screenshots.py"
 
 WIDTH, HEIGHT = 402, 874  # 1x points, same proportions as the 3x captures
 LIGHT_BG = (242, 242, 247)
-DARK_BG = (28, 28, 30)
+DARK_BG = (28, 28, 30)      # luminance ≈ 0.11, like the real captures
+DIM_BG = (76, 76, 78)       # luminance ≈ 0.30: dark by any sane threshold, still dark
+                            # enough that lowering DARK_LUMINANCE into the real range
+                            # (0.12) is caught instead of being indistinguishable
 DIM = (142, 142, 147)
 ACCENT_LIGHT = (0, 122, 255)
 ACCENT_DARK = (10, 132, 255)
@@ -73,11 +76,12 @@ def frame(
     content_accent: bool = False,
     draw_bar: bool = True,
     dark: bool = False,
+    dim: bool = False,
     second_cluster: bool = False,
     wide_block: bool = False,
     accent_above_band: bool = False,
 ) -> list[bytearray]:
-    background = DARK_BG if dark else LIGHT_BG
+    background = DIM_BG if dim else (DARK_BG if dark else LIGHT_BG)
     accent = ACCENT_DARK if dark else ACCENT_LIGHT
     rows = [bytearray(background * WIDTH) for _ in range(HEIGHT)]
     if content_accent:
@@ -198,6 +202,27 @@ def main(argv: list[str]) -> int:
         case(checker, "акцент над полосой (просвечивание контента)", triple(accent_above_band=True), 0, "ИТОГ: OK"),
         # Dark pass, and a name that lies about the appearance it was captured in.
         case(checker, "тёмный проход целиком", triple(prefix="dark-", dark=True), 0, "OK — 3 снимков"),
+        # A dark frame under a light name: the branch prints WARN and still succeeds.
+        # Pinning both the verdict and the word means flipping it to FAIL turns red.
+        case(
+            checker,
+            "тёмный кадр под светлым именем → WARN, но не отказ",
+            {"export": frame("export", dark=True), "browse": frame("browse"), "settings": frame("settings")},
+            0,
+            "WARN",
+        ),
+        # Light frame, no bar, accent only outside the band: the guard must refuse to
+        # judge (exit 2), not agree. This is the branch that was decorative until now.
+        case(
+            checker,
+            "светлый кадр без панели, акцент только вне полосы → отказ судить",
+            triple(draw_bar=False, content_accent=True),
+            2,
+            "полоса не совпадает",
+        ),
+        # Dark, but far brighter than the real captures: this is the only fixture that
+        # bounds DARK_LUMINANCE from below.
+        case(checker, "тёмный проход на яркости ~0.30", triple(prefix="dark-", dim=True), 0, "OK — 3 снимков"),
         # Nested screens are the reason server/advanced exist in the acceptance list;
         # a run that silently drops them from EXPECTED_TAB would report "OK — 0 снимков".
         case(

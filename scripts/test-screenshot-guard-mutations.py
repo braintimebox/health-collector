@@ -65,6 +65,21 @@ MUTATIONS: list[tuple[str, str, str]] = [
         '    "server": "export",\n    "advanced": "settings",\n',
         "",
     ),
+    (
+        "тёмный кадр под светлым именем: WARN → FAIL",
+        'print(f"WARN: {path.name}: снимок тёмный, хотя проход светлый — проверь simctl ui appearance")',
+        'return (f"FAIL: {path.name}: светлый проход, а кадр тёмный", None, 1)',
+    ),
+    (
+        "«акцента нет в полосе» → отказ заменён на «снят другой экран»",
+        "        if outside:",
+        "        if False:",
+    ),
+    (
+        "порог тёмной темы 0.45 → 0.12",
+        "DARK_LUMINANCE = 0.45",
+        "DARK_LUMINANCE = 0.12",
+    ),
 ]
 
 
