@@ -211,6 +211,9 @@ struct ServerView: View {
     @State private var token = ""
     @State private var check: String?
     @State private var checking = false
+    @State private var saveMessage: String?
+    @State private var saveTone: StatusRow.Tone = .neutral
+    @State private var tokenState: (String, StatusRow.Tone) = ("checking", .neutral)
 
     var body: some View {
         Form {
@@ -220,10 +223,14 @@ struct ServerView: View {
                     .autocorrectionDisabled()
                     .keyboardType(.URL)
                 SecureField(AppSettings.hasToken ? "Token (saved in Keychain)" : "Token", text: $token)
-                Button("Save") {
-                    AppSettings.serverURL = url
-                    if !token.isEmpty { AppSettings.token = token; token = "" }
+                Button("Save") { save() }
+                if let saveMessage {
+                    StatusRow(title: "Saved", value: saveMessage, tone: saveTone)
                 }
+            }
+            Section("Stored token") {
+                StatusRow(title: "Keychain", value: tokenState.0, tone: tokenState.1)
+                Text("A token is never written to UserDefaults or to the binary. If the Keychain refuses the write, the screen says so instead of reporting success.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Connection") {
                 StatusRow(title: "API", value: check ?? "not checked",
@@ -248,6 +255,50 @@ struct ServerView: View {
             }
         }
         .navigationTitle("Server")
+        .onAppear { refreshTokenState() }
+    }
+
+    /// Saves through the same parser the runtime uses, so the screen cannot accept
+    /// an address the transport will refuse — one opinion, not two that drift.
+    private func save() {
+        switch ServerEndpoint.parse(url) {
+        case .success(let endpoint):
+            url = endpoint.url.absoluteString
+            AppSettings.serverURL = endpoint.url.absoluteString
+            saveMessage = "endpoint saved: \(endpoint.host)"
+            saveTone = .good
+        case .failure(.empty):
+            // Clearing is legitimate: it means "send nothing", which the runtime honours.
+            AppSettings.serverURL = ""
+            saveMessage = "endpoint cleared — nothing will be sent"
+            saveTone = .warn
+        case .failure(let error):
+            // Not saved on purpose: storing an address the transport refuses while the
+            // field shows something else is how a typo looks like a working setting.
+            saveMessage = "not saved — \(error)"
+            saveTone = .bad
+        }
+
+        if !token.isEmpty {
+            switch AppSettings.setToken(token) {
+            case .success:
+                token = ""
+                saveMessage = (saveMessage ?? "") + "; token stored in Keychain"
+            case .failure(let error):
+                saveMessage = "\(error)"
+                saveTone = .bad
+            }
+        }
+        refreshTokenState()
+    }
+
+    private func refreshTokenState() {
+        switch AppSettings.readToken() {
+        case .success(let value):
+            tokenState = value == nil ? ("not set", .warn) : ("stored", .good)
+        case .failure(let error):
+            tokenState = ("unreadable — \(error)", .bad)
+        }
     }
 }
 

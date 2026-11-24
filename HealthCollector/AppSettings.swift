@@ -10,7 +10,10 @@ struct AppSettings {
     private static let typesKey = "hc.enabledTypes"
 
     static var serverURL: String {
-        get { UserDefaults.standard.string(forKey: urlKey) ?? "https://hermes00.duckdns.org:1118" }
+        // No default address: an app that ships with one sends measurements to
+        // whatever host the author had in mind, and a typo looks like success.
+        // Empty means "not configured" and the runtime refuses to send.
+        get { UserDefaults.standard.string(forKey: urlKey) ?? "" }
         set { UserDefaults.standard.setValue(newValue, forKey: urlKey) }
     }
 
@@ -29,14 +32,44 @@ struct AppSettings {
     private static let service = "com.braintimebox.healthcollector"
     private static let account = "server-token"
 
-    static var token: String {
-        get { (try? readKeychain()) ?? "" }
-        set { try? writeKeychain(newValue) }
+    /// Why a Keychain operation did not happen. `OSStatus` is kept: a token that
+    /// looks saved and was not is exactly the failure this replaces.
+    enum KeychainError: Error, Equatable, CustomStringConvertible {
+        case status(OSStatus)
+        case encoding
+
+        var description: String {
+            switch self {
+            case .status(let code):
+                let text = SecCopyErrorMessageString(code, nil) as String? ?? "OSStatus \(code)"
+                return "Keychain: \(text) (\(code))"
+            case .encoding:
+                return "Keychain: stored token is not valid UTF-8"
+            }
+        }
     }
+
+    /// Best-effort read for call sites that only need a value. `readToken()` is the
+    /// honest one; this keeps "nothing stored" and "the store refused to answer"
+    /// apart only where the screen shows it.
+    static var token: String {
+        get {
+            switch readKeychain() {
+            case .success(let value): return value ?? ""
+            case .failure: return ""
+            }
+        }
+        set { _ = writeKeychain(newValue) }
+    }
+
+    static func readToken() -> Result<String?, KeychainError> { readKeychain() }
+
+    /// The write path the UI uses: an error here is shown, not dropped.
+    static func setToken(_ value: String) -> Result<Void, KeychainError> { writeKeychain(value) }
 
     static var hasToken: Bool { !token.isEmpty }
 
-    private static func readKeychain() throws -> String? {
+    private static func readKeychain() -> Result<String?, KeychainError> {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -46,22 +79,38 @@ struct AppSettings {
         ]
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-        guard status == errSecSuccess, let data = item as? Data else { return nil }
-        return String(data: data, encoding: .utf8)
+        switch status {
+        case errSecSuccess:
+            guard let data = item as? Data, let text = String(data: data, encoding: .utf8) else {
+                return .failure(.encoding)
+            }
+            return .success(text)
+        case errSecItemNotFound:
+            // Nothing has been saved yet. That is a state, not a failure.
+            return .success(nil)
+        default:
+            return .failure(.status(status))
+        }
     }
 
-    private static func writeKeychain(_ value: String) throws {
+    private static func writeKeychain(_ value: String) -> Result<Void, KeychainError> {
         let base: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
-        SecItemDelete(base as CFDictionary)
-        guard !value.isEmpty else { return }
+        // A delete that fails for any reason other than "absent" means the old token
+        // is still there; adding another would leave two items and an ambiguous read.
+        let deleted = SecItemDelete(base as CFDictionary)
+        guard deleted == errSecSuccess || deleted == errSecItemNotFound else {
+            return .failure(.status(deleted))
+        }
+        guard !value.isEmpty else { return .success(()) }
         var query = base
         query[kSecValueData as String] = Data(value.utf8)
         query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        SecItemAdd(query as CFDictionary, nil)
+        let added = SecItemAdd(query as CFDictionary, nil)
+        return added == errSecSuccess ? .success(()) : .failure(.status(added))
     }
 }
 

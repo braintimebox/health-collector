@@ -39,8 +39,19 @@ final class CollectorRuntime: ObservableObject {
 
     /// Endpoint and token come from settings, not from the binary: a token baked
     /// into an IPA is a token in every copy of that IPA.
-    private var baseURL: URL {
-        URL(string: AppSettings.serverURL) ?? URL(string: "https://hermes00.duckdns.org:1118")!
+    ///
+    /// There is no fallback address. An empty or mistyped endpoint used to become
+    /// a compiled-in production host, so a typo sent measurements to a server the
+    /// owner never chose and looked exactly like success. Every caller below
+    /// guards on this value, which is why a bad endpoint builds no request at all.
+    private var endpoint: Result<ServerEndpoint, EndpointError> {
+        ServerEndpoint.parse(AppSettings.serverURL)
+    }
+
+    /// Human-readable reason the endpoint is unusable, or nil when it is fine.
+    private var notConfigured: String? {
+        if case .failure(let error) = endpoint { return error.description }
+        return nil
     }
 
     private var token: String { AppSettings.token }
@@ -105,7 +116,13 @@ final class CollectorRuntime: ObservableObject {
     /// Проверка соединения — это GET по тому же базовому адресу, что и приём.
     /// Ничего не отправляет и ничего не подтверждает.
     func testServer(completion: @escaping (String) -> Void) {
-        var request = URLRequest(url: baseURL.appendingPathComponent("v1/health"))
+        guard case .success(let server) = endpoint else {
+            let text = "not configured: \(notConfigured ?? "no endpoint")"
+            snapshot.serverStatus = text
+            completion(text)
+            return
+        }
+        var request = URLRequest(url: server.url.appendingPathComponent("v1/health"))
         request.timeoutInterval = 10
         if !token.isEmpty {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -139,10 +156,19 @@ final class CollectorRuntime: ObservableObject {
             completion?(message)
             return
         }
+        // A window export exists to deliver a range: with no usable endpoint there
+        // is nowhere to deliver it, so nothing is read and no request is built.
+        guard case .success(let server) = endpoint else {
+            let message = notConfigured ?? "no endpoint configured"
+            snapshot.lastError = message
+            completion?(message)
+            return
+        }
         let window = CollectionWindow.make(period: period, now: Date())
         let source = self.source
         let types = HealthKitSource.supportedTypes
-        let transport = URLSessionTransport(baseURL: baseURL, token: token)
+        let transport = URLSessionTransport(baseURL: server.url, token: token)
+        let misconfiguration = notConfigured
         queue.async { [weak self] in
             var collected = 0
             var accepted = 0
@@ -184,7 +210,11 @@ final class CollectorRuntime: ObservableObject {
 
     /// Диагностика без секретов и без значений измерений.
     func diagnosticsText() -> String {
-        let host = URL(string: AppSettings.serverURL)?.host ?? "?"
+        let host: String
+        switch endpoint {
+        case .success(let server): host = server.host
+        case .failure(let error): host = "not configured (\(error))"
+        }
         let snapshot = self.snapshot
         return [
             "HealthCollector",
@@ -207,7 +237,15 @@ final class CollectorRuntime: ObservableObject {
         }
         let source = self.source
         let types = HealthKitSource.supportedTypes
-        let transport = URLSessionTransport(baseURL: baseURL, token: token)
+        // Collection still runs without an endpoint: readings already in HealthKit
+        // belong in the durable outbox, and dropping them would turn a settings
+        // mistake into lost data. Only the transfer is skipped — and it is skipped
+        // by never building a transport, not by trying and failing.
+        let transport: OutboxTransport? = {
+            guard case .success(let server) = endpoint else { return nil }
+            return URLSessionTransport(baseURL: server.url, token: token)
+        }()
+        let misconfiguration = notConfigured
         queue.async { [weak self] in
             var collected = 0
             var accepted = 0
@@ -216,8 +254,12 @@ final class CollectorRuntime: ObservableObject {
                 let collector = Collector(
                     source: source, outbox: outbox, anchors: anchors, types: types, clock: Date.init)
                 collected = try collector.collectOnce().inserted
-                let engine = SyncEngine(userID: "owner", store: outbox, transport: transport)
-                accepted = try engine.drain(now: Date()).accepted
+                if let transport {
+                    let engine = SyncEngine(userID: "owner", store: outbox, transport: transport)
+                    accepted = try engine.drain(now: Date()).accepted
+                } else {
+                    failure = misconfiguration ?? "no endpoint configured"
+                }
             } catch {
                 failure = "\(error)"
             }

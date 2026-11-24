@@ -1,4 +1,5 @@
 import SwiftUI
+import HealthCollectorCore
 
 struct SettingsTab: View {
     @ObservedObject var runtime: CollectorRuntime
@@ -81,7 +82,20 @@ struct ExportSettingsView: View {
                 TextField("Endpoint", text: $url)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Button("Save endpoint") { AppSettings.serverURL = url }
+                Button("Save endpoint") {
+                    switch ServerEndpoint.parse(url) {
+                    case .success(let endpoint):
+                        url = endpoint.url.absoluteString
+                        AppSettings.serverURL = endpoint.url.absoluteString
+                    case .failure(.empty):
+                        AppSettings.serverURL = ""
+                    case .failure:
+                        // Same refusal as the Server screen: the field keeps what was
+                        // typed, the stored endpoint keeps what was proven to work.
+                        break
+                    }
+                }
+                Text("Only https is accepted (plain http for loopback). An empty or invalid address means “not configured” — the collector keeps readings in the queue and sends nothing.").font(.caption).foregroundStyle(.secondary)
                 StatusRow(title: "Token", value: AppSettings.hasToken ? "stored in Keychain" : "not set",
                           tone: AppSettings.hasToken ? .good : .warn)
             }
