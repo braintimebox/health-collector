@@ -42,7 +42,7 @@ struct ExportTab: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    runtime.syncNow(reason: "manual")
+                    runtime.syncNow(trigger: .manual)
                 } label: {
                     Label("Sync", systemImage: "arrow.triangle.2.circlepath")
                 }
@@ -90,13 +90,13 @@ struct StatusStrip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Collector").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
-            StatusRow(title: "Queue", value: "\(runtime.snapshot.queueDepth)",
-                      tone: runtime.snapshot.queueDepth > 0 ? .warn : .good)
-            StatusRow(title: "Oldest pending", value: duration(runtime.snapshot.oldestPending),
-                      tone: (runtime.snapshot.oldestPending ?? 0) > 86_400 ? .warn : .neutral)
-            StatusRow(title: "Last success", value: relative(runtime.snapshot.lastSuccessAt))
-            StatusRow(title: "Last run", value: relative(runtime.snapshot.lastRunAt))
-            if let error = runtime.snapshot.lastError {
+            StatusRow(title: "Queue", value: "\(runtime.state.queueDepth)",
+                      tone: runtime.state.queueDepth > 0 ? .warn : .good)
+            StatusRow(title: "Oldest pending", value: duration(runtime.state.oldestPending),
+                      tone: (runtime.state.oldestPending ?? 0) > 86_400 ? .warn : .neutral)
+            StatusRow(title: "Last success", value: relative(runtime.state.lastSuccessAt))
+            StatusRow(title: "Last run", value: relative(runtime.state.lastRunAt))
+            if let error = runtime.state.lastError {
                 StatusRow(title: "Last error", value: error, tone: .bad)
                     .lineLimit(3)
             }
@@ -137,9 +137,9 @@ struct ManualExportView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Result") {
-                StatusRow(title: "New rows", value: "\(runtime.snapshot.collected)")
-                StatusRow(title: "Accepted", value: "\(runtime.snapshot.accepted)", tone: .good)
-                if let error = runtime.snapshot.lastError {
+                StatusRow(title: "New rows", value: "\(runtime.state.lastRunCollected)")
+                StatusRow(title: "Accepted", value: "\(runtime.state.lastRunAccepted)", tone: .good)
+                if let error = runtime.state.lastError {
                     StatusRow(title: "Error", value: error, tone: .bad)
                 }
             }
@@ -179,20 +179,24 @@ struct AutomatedView: View {
         Form {
             Section {
                 Toggle("Automatic collection", isOn: $enabled)
-                    .onChange(of: enabled) { _, value in AppSettings.automationEnabled = value }
+                    // The switch is applied to the runtime immediately; writing the
+                    // setting alone would leave the behaviour unchanged until the next
+                    // launch, which is exactly what made this toggle decorative.
+                    .onChange(of: enabled) { _, value in runtime.setAutomation(value) }
+                    .onAppear { enabled = runtime.state.automationEnabled }
                 Text("iOS decides when a background wake-up happens. The collector registers an observer and enables background delivery; it does not promise a schedule.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Last run") {
-                StatusRow(title: "Run", value: relative(runtime.snapshot.lastRunAt))
-                StatusRow(title: "Success", value: relative(runtime.snapshot.lastSuccessAt))
-                StatusRow(title: "Trigger", value: runtime.snapshot.detail)
+                StatusRow(title: "Run", value: relative(runtime.state.lastRunAt))
+                StatusRow(title: "Success", value: relative(runtime.state.lastSuccessAt))
+                StatusRow(title: "Trigger", value: runtime.state.triggerLabel)
             }
             Section("Queue") {
-                StatusRow(title: "Pending", value: "\(runtime.snapshot.queueDepth)",
-                          tone: runtime.snapshot.queueDepth > 0 ? .warn : .good)
-                StatusRow(title: "Dead letter", value: "\(runtime.snapshot.deadCount)",
-                          tone: runtime.snapshot.deadCount > 0 ? .bad : .good)
-                StatusRow(title: "Oldest pending", value: duration(runtime.snapshot.oldestPending))
+                StatusRow(title: "Pending", value: "\(runtime.state.queueDepth)",
+                          tone: runtime.state.queueDepth > 0 ? .warn : .good)
+                StatusRow(title: "Dead letter", value: "\(runtime.state.deadCount)",
+                          tone: runtime.state.deadCount > 0 ? .bad : .good)
+                StatusRow(title: "Oldest pending", value: duration(runtime.state.oldestPending))
             }
             Section {
                 Text("Background delivery, observer wake-ups and BGTaskScheduler are the only mechanisms available. A force-quit stops transfers until you open the app again — that is an iOS rule, not a setting.")
@@ -246,11 +250,11 @@ struct ServerView: View {
                 .disabled(checking || url.isEmpty)
             }
             Section("Sync") {
-                StatusRow(title: "Awaiting send", value: "\(runtime.snapshot.queueDepth)")
-                StatusRow(title: "Last success", value: relative(runtime.snapshot.lastSuccessAt))
-                StatusRow(title: "Last error", value: runtime.snapshot.lastError ?? "none",
-                          tone: runtime.snapshot.lastError == nil ? .good : .bad)
-                Button("Send now") { runtime.syncNow(reason: "manual from server screen") }
+                StatusRow(title: "Awaiting send", value: "\(runtime.state.queueDepth)")
+                StatusRow(title: "Last success", value: relative(runtime.state.lastSuccessAt))
+                StatusRow(title: "Last error", value: runtime.state.lastError ?? "none",
+                          tone: runtime.state.lastError == nil ? .good : .bad)
+                Button("Send now") { runtime.syncNow(trigger: .manual) }
                 Text("Uses the existing measurement contract: idempotent by (user, record id), deletes as tombstones, per-record acknowledgement.").font(.caption).foregroundStyle(.secondary)
             }
         }

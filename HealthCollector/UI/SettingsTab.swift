@@ -46,7 +46,7 @@ struct PermissionsView: View {
     var body: some View {
         List {
             Section {
-                StatusRow(title: "Request", value: runtime.snapshot.permissions)
+                StatusRow(title: "Request", value: runtime.state.permissionLabel)
                 Text("iOS does not tell an app whether read access was granted. A refused type looks exactly like a type with no data, and limited access is the only state an app can positively identify. This screen therefore reports what was requested, not a false \"Connected\".").font(.caption).foregroundStyle(.secondary)
             }
             Section {
@@ -75,7 +75,10 @@ struct ExportSettingsView: View {
         Form {
             Section {
                 Toggle("Automatic collection", isOn: $automated)
-                    .onChange(of: automated) { _, value in AppSettings.automationEnabled = value }
+                    .onChange(of: automated) { _, value in runtime.setAutomation(value) }
+                    // Both screens read the same runtime state, so a change made on
+                    // one is not invisible on the other.
+                    .onAppear { automated = runtime.state.automationEnabled }
                 Text("When off, the collector only runs when you open the app or press Sync. Background wakes are requested from iOS either way; it decides when they happen.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Server") {
@@ -141,27 +144,27 @@ struct AdvancedView: View {
     var body: some View {
         List {
             Section("Collector") {
-                StatusRow(title: "Queue depth", value: "\(runtime.snapshot.queueDepth)",
-                          tone: runtime.snapshot.queueDepth > 0 ? .warn : .good)
-                StatusRow(title: "Pending records", value: "\(runtime.snapshot.queueDepth)")
-                StatusRow(title: "Dead letter", value: "\(runtime.snapshot.deadCount)",
-                          tone: runtime.snapshot.deadCount > 0 ? .bad : .good)
-                StatusRow(title: "Oldest pending", value: duration(runtime.snapshot.oldestPending))
+                StatusRow(title: "Queue depth", value: "\(runtime.state.queueDepth)",
+                          tone: runtime.state.queueDepth > 0 ? .warn : .good)
+                StatusRow(title: "Pending records", value: "\(runtime.state.queueDepth)")
+                StatusRow(title: "Dead letter", value: "\(runtime.state.deadCount)",
+                          tone: runtime.state.deadCount > 0 ? .bad : .good)
+                StatusRow(title: "Oldest pending", value: duration(runtime.state.oldestPending))
             }
             Section("Activity") {
-                StatusRow(title: "Last collection", value: relative(runtime.snapshot.lastRunAt))
-                StatusRow(title: "Last successful sync", value: relative(runtime.snapshot.lastSuccessAt))
-                StatusRow(title: "Last error", value: runtime.snapshot.lastError ?? "none",
-                          tone: runtime.snapshot.lastError == nil ? .good : .bad)
-                StatusRow(title: "Trigger", value: runtime.snapshot.detail)
+                StatusRow(title: "Last collection", value: relative(runtime.state.lastRunAt))
+                StatusRow(title: "Last successful sync", value: relative(runtime.state.lastSuccessAt))
+                StatusRow(title: "Last error", value: runtime.state.lastError ?? "none",
+                          tone: runtime.state.lastError == nil ? .good : .bad)
+                StatusRow(title: "Trigger", value: runtime.state.triggerLabel)
             }
             Section("HealthKit") {
-                StatusRow(title: "Authorization", value: runtime.snapshot.permissions)
-                StatusRow(title: "Background delivery", value: runtime.snapshot.backgroundDelivery)
+                StatusRow(title: "Authorization", value: runtime.state.permissionLabel)
+                StatusRow(title: "Background delivery", value: runtime.state.backgroundLabel)
             }
             Section("Server") {
                 StatusRow(title: "Endpoint", value: AppSettings.serverURL)
-                StatusRow(title: "Connectivity", value: runtime.snapshot.serverStatus)
+                StatusRow(title: "Connectivity", value: runtime.state.connectionLabel)
             }
             Section {
                 Button(copied ? "Copied" : "Copy diagnostics") {

@@ -1,7 +1,10 @@
 import Foundation
 
-public enum PermissionState: String, Equatable {
+public enum PermissionState: String, Equatable, Sendable {
     case unknown
+    /// The prompt was shown and answered, but iOS does not disclose read access:
+    /// a refusal and an empty store look identical. This state says only that.
+    case requested
     case full
     case partial
     case denied

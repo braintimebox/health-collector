@@ -77,6 +77,31 @@ final class HealthKitSource: HealthSource {
     private let userID: String
     private let lock = NSLock()
     private var pendingWake: (() -> Void)?
+    /// What HealthKit answered for background delivery, per type.
+    ///
+    /// A `false` here cannot distinguish a missing entitlement from a user denial,
+    /// so the derived state says "disabled" and never pretends to name the cause —
+    /// but leaving the answer unread was worse: the diagnostics line claimed
+    /// "unknown (not observable)" forever, which is a statement about our code, not
+    /// about HealthKit.
+    private var deliveryOutcomes: [String: Bool] = [:]
+
+    /// Rounded-up answer across every type: all enabled, some refused, or nothing
+    /// asked yet. Called from the main actor; the dictionary is written from the
+    /// HealthKit completion queue, so it is only ever touched under `lock`.
+    func backgroundDeliverySnapshot() -> BackgroundDeliveryState {
+        lock.lock()
+        let outcomes = deliveryOutcomes
+        lock.unlock()
+        guard !outcomes.isEmpty else { return .unknown }
+        return outcomes.values.allSatisfy { $0 } ? .enabled : .disabled
+    }
+
+    private func record(deliveryEnabled: Bool, for type: String) {
+        lock.lock()
+        deliveryOutcomes[type] = deliveryEnabled
+        lock.unlock()
+    }
 
     init(userID: String) {
         self.userID = userID
@@ -112,9 +137,12 @@ final class HealthKitSource: HealthSource {
                 wake?()
             }
             store.execute(query)
-            store.enableBackgroundDelivery(for: mapping.sampleType, frequency: mapping.frequency) { _, _ in
-                // The result is intentionally not surfaced as a boolean: a `false`
-                // here cannot distinguish a missing entitlement from a user denial.
+            let wireType = mapping.wireType
+            store.enableBackgroundDelivery(for: mapping.sampleType, frequency: mapping.frequency) { [weak self] enabled, error in
+                // Recorded, not judged: `false` cannot distinguish a missing
+                // entitlement from a user denial, so the panel will say "disabled"
+                // and never invent the cause.
+                self?.record(deliveryEnabled: error == nil && enabled, for: wireType)
             }
         }
     }
