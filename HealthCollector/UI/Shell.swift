@@ -4,6 +4,7 @@ import SwiftUI
 /// scroll position and the pushed detail screen.
 struct AppShell: View {
     @ObservedObject var runtime: CollectorRuntime
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selection: Tab = AppShell.initialTab
     private let route = AppShell.initialRoute
 
@@ -50,6 +51,12 @@ struct AppShell: View {
                 .tag(Tab.settings)
         }
         .task { runtime.start() }
+        // Returning to the app is a collection trigger like any other, so it goes
+        // through the same gate: with the switch off this call decides to skip and
+        // the panel says so, instead of quietly collecting anyway.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { runtime.syncNow(trigger: .foreground) }
+        }
         // Three tabs are also three addresses: `healthcollector://browse` is what a
         // screenshot job, and later a Shortcut, uses to land on a screen without
         // driving the UI.

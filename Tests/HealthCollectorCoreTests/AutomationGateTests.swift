@@ -55,6 +55,35 @@ final class AutomationGateTests: XCTestCase {
         }
     }
 
+    // MARK: - The switch takes effect on the very next trigger
+
+    func testFlippingTheSwitchChangesTheNextDecisionWithoutAnyOtherState() {
+        // Foreground is the trigger that fires when the user comes back to the app,
+        // i.e. exactly when they expect their change to have taken effect.
+        XCTAssertEqual(
+            AutomationGate.decide(trigger: .foreground, automationEnabled: true), .run)
+        XCTAssertEqual(
+            AutomationGate.decide(trigger: .foreground, automationEnabled: false),
+            .skip(.automationDisabled))
+        // And back: disabling is not sticky.
+        XCTAssertEqual(
+            AutomationGate.decide(trigger: .foreground, automationEnabled: true), .run)
+    }
+
+    func testEveryRuntimeEntryPointIsACollectionTrigger() {
+        // If a new entry point is added to the runtime, it must pick a trigger —
+        // this list is the checklist the code review reads.
+        // Exactly the five the runtime fires today; `.observer` is declared for a
+        // future direct observer wake-up but is not wired to anything yet, and
+        // claiming it here would be the same overstatement this file exists to stop.
+        let wired: [CollectionTrigger] = [.launch, .foreground, .backgroundDelivery, .manual, .windowExport]
+        for trigger in wired {
+            XCTAssertEqual(
+                AutomationGate.decide(trigger: trigger, automationEnabled: true), .run,
+                "\(trigger) must be able to collect when automation is on")
+        }
+    }
+
     // MARK: - State model: one source, typed
 
     func testRuntimeStateDerivesEveryNumberFromTheStoredStatus() {
