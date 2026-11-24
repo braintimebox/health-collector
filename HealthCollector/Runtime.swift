@@ -227,8 +227,9 @@ final class CollectorRuntime: ObservableObject {
                 failure = failure ?? "\(error)"
             }
             let status = CollectorStatus.make(
-                store: outbox, anchors: anchors, types: types, now: Date(),
-                permissions: permission, backgroundDelivery: background)
+                store: outbox, anchors: anchors,
+                permissions: permission, backgroundDelivery: background,
+                types: types, now: Date())
             Task { @MainActor in
                 guard let self else { return }
                 self.apply(status: status, collected: collected, accepted: accepted, failure: failure)
@@ -290,8 +291,9 @@ final class CollectorRuntime: ObservableObject {
                 failure = "\(error)"
             }
             let status = CollectorStatus.make(
-                store: outbox, anchors: anchors, types: types, now: Date(),
-                permissions: permission, backgroundDelivery: background)
+                store: outbox, anchors: anchors,
+                permissions: permission, backgroundDelivery: background,
+                types: types, now: Date())
             Task { @MainActor in
                 guard let self else { return }
                 self.apply(status: status, collected: collected, accepted: accepted, failure: failure)
