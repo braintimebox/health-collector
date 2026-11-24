@@ -234,3 +234,61 @@ Two consequences, both implemented:
 * The live/receiver halves stay out of CI — the receiver source and a running server
   are not in this repository. That is printed (`RECEIVER: не проверялось`,
   `LIVE: не проверялось`), never implied as checked.
+
+---
+
+# The door: code ready, restart pending
+
+Condition 6 of the P1 approval is "close the unauthenticated POST before deploying the
+measurement route". State of the door, measured, not assumed.
+
+## The defect was documentation, not a missing secret
+
+`server.py`'s comment said the token comes from `HEALTH_BRIDGE_TOKEN` and, failing that,
+from `credentials/health-bridge.yaml`. The code read only the environment variable. The
+file exists (`~/.hermes/credentials/health-bridge.yaml`, mode `0600`, `token:` present)
+and was read by nobody — so `[AUTH] … токен не проверяется` was a true warning about a
+protection that was documented as present.
+
+## The fix (receiver repo, `6babf90`)
+
+Resolution order: `HEALTH_BRIDGE_TOKEN`, then `HEALTH_BRIDGE_CREDENTIALS` override, then
+`./credentials/health-bridge.yaml`, then `~/.hermes/credentials/health-bridge.yaml`. The
+module prints which one won — length only, never the value — or that the door is open.
+`scripts/test-auth-token.py` locks five cases (env wins, yaml read, quoted value, nothing
+anywhere, env beats yaml). Mutation control: restoring the env-only line fails 2 of 5.
+
+## Measured with the token resolved from yaml (scratch instance, port 8934)
+
+| request | answer |
+|---|---|
+| `GET /v1/health` without token | **200** — liveness exempt, leaks only `{"status":"ok"}` |
+| `POST /health-bridge` without token | **401** |
+| `POST /health-bridge` with token, empty body | **400** — auth passed, body rejected |
+| `GET /v1/measurements` without token | **401** — protected |
+| `GET /v1/measurements` with token | **404** — genuinely absent, as the contract says |
+
+The last pair is why `--token` had to exist in the gate: with a token, "missing" and
+"protected" become distinguishable, and the contract's `deployed:false` becomes a
+checkable claim instead of a coincidence.
+
+## Gate against the closed door, both ways
+
+| run | verdict |
+|---|---|
+| no token | `UNCHECKED: route measurements … answers 401 without a token`, **exit 2** — refuses to call it clean |
+| token from credentials | `ok live: health_probe 200`, `measurements 404 as declared`, `ИТОГ: согласованы`, **exit 0** |
+
+## What is still not done
+
+* **The live receiver still has the door open.** `POST /health-bridge` on 8910 answers
+  400 without a token right now — the running process predates both the yaml fallback
+  and the `OPEN_PATHS` change. Closing it is one restart:
+
+  ```
+  sudo systemctl restart health-bridge.service
+  ```
+
+  Then: `POST /health-bridge` without a token must answer **401**, `GET /v1/health` must
+  still answer **200**, and the gate with `HC_SERVER_TOKEN` must stay green.
+* **`/v1/measurements` must not be deployed before that restart**, per condition 6.
