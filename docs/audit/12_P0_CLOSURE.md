@@ -173,3 +173,64 @@ gate fails by route name. That is the defect, caught by the test written for it.
   means the test stand accepted a batch, not that the agent can read the data. The
   contract records this as a known gap, and case `S7` fails the day it starts
   answering — that is the signal to flip `deployed` and stop calling it a gap.
+
+---
+
+# Round 3 — the gate stops being arguable
+
+Three of the gate's branches were decoration (found by @team-gate, reproduced here),
+and closing the receiver's door exposed a fourth problem that was measured, not
+reasoned about.
+
+## The three fixes
+
+| mutation that used to work | what fails it now | case |
+|---|---|---|
+| `health_probe`: `deployed:false` + `live_expect:"404"` on a server that answers 404 → `согласованы`, rc=0 | `--receiver` parses the receiver's own `@app.<verb>` decorators; `deployed` must match the code: `server.py serves /v1/health but the contract marks it not deployed`. `--require-receiver` makes a missing receiver exit 2 | S10, S11, S12 |
+| `del entry["client"]` → `KeyError: 'client'`; `"client": null` → `AttributeError` | both are addressed: `route health_probe: в контракте нет поля client`; the self-test fails any case whose output contains a `Traceback` | S16, S17 |
+| literal `"v1/health"` (no slash — the shape the original defect was written in) → rc=0 | the scan matches `(^|/)v1/` in any string literal outside `ApiRoute.swift` | S6 |
+
+Run by hand on the real tree, with the flag flipped exactly as the mutation did:
+
+```
+FAIL: route health_probe: server.py serves /v1/health but the contract marks it not deployed
+      — flipping the flag does not make the route absent            rc=1
+```
+
+Contract restored afterwards; `sha256` of `contract/routes.json` identical before and
+after (`0c7bed6d…f6f4`).
+
+## The fourth problem, measured when the door closes
+
+The receiver's auth middleware runs **before routing**, so an undeployed route behind a
+closed door answers **401**, not 404. On a token-configured instance (port 8933,
+`HEALTH_BRIDGE_TOKEN=probe-secret`):
+
+| request | answered |
+|---|---|
+| `GET /v1/health` (no token) | **200** — but only after the `OPEN_PATHS` fix below |
+| `POST /health-bridge` (no token) | **401** |
+| `GET /health-bridge` (no token) | **401** |
+| `POST /health-bridge` with token, empty body | 400 — auth passed, validation refused |
+| `GET /v1/measurements` (no token) | **401** — not 404 |
+
+Two consequences, both implemented:
+
+1. **`OPEN_PATHS` now includes `/health` and `/v1/health`.** They were not exempt, so
+   the first token installed would have made every liveness probe — including this
+   gate's — fail with 401. A liveness answer (`{"status":"ok"}`) leaks nothing.
+   *Not live yet:* the running process predates this change, so whoever sets the token
+   must restart the unit, otherwise `/v1/health` becomes 401.
+2. **401 without a token is `UNKNOWN` (exit 2), not drift and not a pass.** The gate
+   prints `UNCHECKED: … auth runs before routing, so missing and protected are
+   indistinguishable here` and refuses to call the run clean; a 401 *with* a token
+   supplied is exit 1, because a rejected credential is a real defect.
+
+## State of the gate
+
+* self-test: **17 cases**, each asserting a phrase only its branch prints; any
+  traceback in the output fails the case.
+* `swift test` unchanged at 68; CI job `route contract` runs static + self-test.
+* The live/receiver halves stay out of CI — the receiver source and a running server
+  are not in this repository. That is printed (`RECEIVER: не проверялось`,
+  `LIVE: не проверялось`), never implied as checked.

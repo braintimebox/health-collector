@@ -195,8 +195,10 @@ def build() -> list[tuple[HTTPServer, str]]:
 
     rejected = start_stub({"/v1/health": 200}, requires_token="secret")
     started.append(rejected)
+    # Auth runs before routing, so a 401 without a token says "protected", not "missing":
+    # that is UNKNOWN, not a drift and not a pass.
     case("S13 проба отвергнута 401 без токена", make_tree(),
-         ("--server", rejected[1]), 1, "answers 401")
+         ("--server", rejected[1]), 2, "не проверены")
 
     case("S14 проба отвергнута 401 с неверным токеном", make_tree(),
          ("--server", rejected[1], "--token", "wrong"), 1, "answers 401")

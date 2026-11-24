@@ -185,9 +185,15 @@ def probe(url: str, method: str, token: str | None, timeout: float = 8.0) -> tup
         return None, str(error)
 
 
-def check_live(contract: dict, server: str, token: str | None) -> tuple[list[str], list[str], bool]:
-    """Returns (failures, notes, reachable)."""
-    failures, notes = [], []
+def check_live(contract: dict, server: str,
+               token: str | None) -> tuple[list[str], list[str], list[str], bool]:
+    """Returns (failures, notes, unchecked, reachable).
+
+    `unchecked` holds routes the server refused to answer without a token. Auth runs
+    before routing, so a 401 says "protected", not "missing" — treating it as either
+    drift or a pass would be a claim the probe cannot make.
+    """
+    failures, notes, unchecked = [], [], []
     reachable = False
     for entry in contract["routes"]:
         url = server.rstrip("/") + entry["path"]
@@ -198,13 +204,17 @@ def check_live(contract: dict, server: str, token: str | None) -> tuple[list[str
             failures.append(f"route {entry['id']}: {url} unreachable ({error})")
             continue
 
-        # A refused probe is its own outcome, never "not 404".
         if status == 401:
-            who = "токен передан и отвергнут" if token else "токен не передан"
-            failures.append(
-                f"route {entry['id']}: {url} answers 401 ({who}) — the probe was refused, which "
-                f"is not the same as the route being missing"
-            )
+            if token:
+                failures.append(
+                    f"route {entry['id']}: {url} answers 401 with the supplied token — the "
+                    f"credential was rejected, which is not the same as a missing route"
+                )
+            else:
+                unchecked.append(
+                    f"route {entry['id']}: {url} answers 401 without a token — auth runs before "
+                    f"routing, so missing and protected are indistinguishable here"
+                )
             continue
 
         expected = entry.get("live_expect", "not_404")
@@ -229,7 +239,7 @@ def check_live(contract: dict, server: str, token: str | None) -> tuple[list[str
                     f"route {entry['id']}: now answers {status} — the contract says not deployed; "
                     f"flip 'deployed' and 'live_expect' in contract/routes.json"
                 )
-    return failures, notes, reachable
+    return failures, notes, unchecked, reachable
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -281,11 +291,13 @@ def main(argv: list[str] | None = None) -> int:
         print("LIVE: не проверялось (--server не задан) — живые ответы не подтверждены")
         return 0
 
-    live_failures, notes, reachable = check_live(contract, args.server, token)
+    live_failures, notes, unchecked, reachable = check_live(contract, args.server, token)
     for note in notes:
         print(f"ok live: {note}")
     for failure in live_failures:
         print(f"FAIL: {failure}")
+    for line in unchecked:
+        print(f"UNCHECKED: {line}")
 
     if not reachable:
         print(f"\nUNKNOWN: {args.server} недоступен — живые ответы не проверены")
@@ -293,6 +305,11 @@ def main(argv: list[str] | None = None) -> int:
     if live_failures:
         print(f"\nИТОГ: {len(live_failures)} расхождений между контрактом и сервером")
         return 1
+    if unchecked:
+        print(f"\nUNKNOWN: {len(unchecked)} маршрут(ов) не проверены — сервер требует токен; "
+              f"задай --token или HC_SERVER_TOKEN, иначе «согласованы» было бы утверждением "
+              f"сильнее прогона")
+        return 2
 
     if not token:
         print("AUTH: проба шла без токена — 401 на этом прогоне обнаружен быть не мог")
