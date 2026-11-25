@@ -15,10 +15,10 @@
       "method": "POST",
       "path": "/v1/measurements",
       "client": "ApiRoute.measurements",
-      "deployed": false,
-      "live_expect": "404",
+      "deployed": true,
+      "live_expect": "400",
       "used_by": "SyncEngine batch ingest",
-      "known_gap": "Declared by the client, not served by the receiver: an ACK today means the test stand accepted the batch, not that the agent can read the data."
+      "known_gap": "Развёрнут на приёмнике 8910 и сверен с клиентом/контрактом (check-route-drift.py --require-live --token, ИТОГ согласовано): 401 без токена, 400 на пустом пинге (маршрут достигнут, авторизация пройдена), 200 на валидном батче — проверено на резервном порту и в S-тестах ядра. Проверено 2026-11-25; клиентская сборка — 5f02585."
     }
   ]
 }
