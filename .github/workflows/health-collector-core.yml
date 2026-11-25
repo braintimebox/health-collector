@@ -47,6 +47,11 @@ jobs:
 
       - name: The gate notices drift (self-test)
         run: python3 scripts/test-route-drift.py
+
+      # The core suite proves the decision; this proves the app asks for it.
+      # Without it, replacing the gate call with a constant stayed 83/83 green.
+      - name: The automation switch is wired to the collector
+        run: python3 scripts/check-automation-gate.py --self-test
         # The receiver's source is not in this repository, so the deployed-flag half
         # cannot run here; the self-test covers it with fixtures instead. Where the
         # receiver does live, the full form is:
